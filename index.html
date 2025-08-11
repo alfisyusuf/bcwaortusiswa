@@ -4,119 +4,416 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kirim Pesan WhatsApp</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --primary: #25D366;
+            --primary-dark: #128C7E;
+            --secondary: #3498db;
+            --secondary-dark: #2980b9;
+            --light-gray: #f4f4f4;
+            --medium-gray: #ecf0f1;
+            --dark-gray: #2c3e50;
+            --text: #333;
+            --text-light: #7f8c8d;
+            --white: #ffffff;
+            --border: #bdc3c7;
+            --error: #e74c3c;
+            --success: #2ecc71;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             line-height: 1.6;
-            background-color: #f4f4f4;
-            color: #333;
+            background-color: var(--light-gray);
+            color: var(--text);
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            min-height: 100vh;
         }
+        
         .container {
             max-width: 1000px;
             margin: 0 auto;
-            background-color: #fff;
+            background-color: var(--white);
             padding: 25px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            margin-top: 20px;
+            margin-bottom: 20px;
         }
+        
         h1, h2 {
-            text-align: center;
-            color: #2c3e50;
+            color: var(--dark-gray);
+            margin-bottom: 1rem;
         }
-        /* Kotak Template Pesan */
+        
+        h1 {
+            text-align: center;
+            font-size: 1.8rem;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--medium-gray);
+            margin-bottom: 25px;
+        }
+        
+        h2 {
+            font-size: 1.4rem;
+            text-align: left;
+        }
+        
+        /* Template Message Box */
         .template-box {
-            background-color: #ecf0f1;
-            border: 1px solid #bdc3c7;
+            background-color: var(--medium-gray);
+            border: 1px solid var(--border);
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 30px;
+            position: relative;
         }
+        
         .template-box h2 {
-            text-align: left;
             margin-top: 0;
-            font-size: 1.5em;
+            display: flex;
+            align-items: center;
         }
+        
+        .template-box h2 i {
+            margin-right: 10px;
+            color: var(--secondary);
+        }
+        
         #message-template {
             width: 100%;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            font-size: 1em;
+            min-height: 150px;
+            resize: vertical;
+            font-family: inherit;
+            transition: border 0.3s ease;
+        }
+        
+        #message-template:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        .variables {
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: var(--text-light);
+            background-color: rgba(255,255,255,0.7);
             padding: 10px;
             border-radius: 4px;
-            border: 1px solid #bdc3c7;
-            font-size: 1em;
-            box-sizing: border-box; /* Penting agar padding tidak menambah lebar */
         }
-        .variables {
-            margin-top: 10px;
-            font-size: 0.9em;
-            color: #7f8c8d;
+        
+        .variables strong {
+            color: var(--dark-gray);
         }
+        
+        /* Table Styles */
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
+        
         table.hidden {
             display: none;
         }
+        
         th, td {
             padding: 12px 15px;
             border: 1px solid #ddd;
             text-align: left;
             vertical-align: middle;
         }
+        
         thead tr {
-            background-color: #3498db;
-            color: #fff;
+            background-color: var(--secondary);
+            color: var(--white);
         }
+        
         tbody tr:nth-child(even) {
-            background-color: #f2f2f2;
+            background-color: var(--light-gray);
         }
+        
+        tbody tr:hover {
+            background-color: rgba(52, 152, 219, 0.1);
+        }
+        
+        /* Status Message */
         #status-message {
             text-align: center;
             padding: 20px;
             font-size: 1.1em;
-            color: #777;
+            color: var(--text-light);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100px;
         }
+        
+        .loading-spinner {
+            border: 4px solid rgba(0,0,0,0.1);
+            border-radius: 50%;
+            border-top: 4px solid var(--secondary);
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
         .error {
-            color: #e74c3c;
+            color: var(--error);
             font-weight: bold;
         }
-        /* Tombol Kirim Pesan */
+        
+        .success {
+            color: var(--success);
+        }
+        
+        /* Buttons */
+        .btn-container {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
         .send-btn {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             margin: 2px;
-            padding: 6px 12px;
+            padding: 8px 15px;
             color: white;
             text-decoration: none;
-            border-radius: 4px;
+            border-radius: 6px;
             font-size: 0.9em;
             border: none;
             cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 80px;
         }
-        .send-btn.student { background-color: #25D366; }
-        .send-btn.student:hover { background-color: #128C7E; }
-        .send-btn.parent { background-color: #3498db; }
-        .send-btn.parent:hover { background-color: #2980b9; }
-
+        
+        .send-btn i {
+            margin-right: 5px;
+            font-size: 0.9em;
+        }
+        
+        .send-btn.student { 
+            background-color: var(--primary); 
+        }
+        .send-btn.student:hover { 
+            background-color: var(--primary-dark); 
+            transform: translateY(-2px);
+        }
+        
+        .send-btn.parent { 
+            background-color: var(--secondary); 
+        }
+        .send-btn.parent:hover { 
+            background-color: var(--secondary-dark); 
+            transform: translateY(-2px);
+        }
+        
+        /* Filter/Search */
+        .search-container {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px 15px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+        
+        .search-box:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        .filter-btn {
+            background-color: var(--white);
+            border: 1px solid var(--border);
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-btn:hover {
+            background-color: var(--light-gray);
+        }
+        
+        .filter-btn.active {
+            background-color: var(--secondary);
+            color: var(--white);
+            border-color: var(--secondary);
+        }
+        
+        /* Responsive Table */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+                margin: 10px;
+            }
+            
+            table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+            
+            th, td {
+                padding: 8px 10px;
+            }
+            
+            .send-btn {
+                padding: 6px 10px;
+                min-width: auto;
+            }
+            
+            .btn-container {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .search-container {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .search-box {
+                width: 100%;
+            }
+        }
+        
+        /* Floating Action Button */
+        .fab {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            cursor: pointer;
+            z-index: 100;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        
+        .fab:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-3px) scale(1.05);
+        }
+        
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: var(--dark-gray);
+            color: var(--white);
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.8em;
+            font-weight: normal;
+        }
+        
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-light);
+        }
+        
+        .empty-state i {
+            font-size: 3em;
+            margin-bottom: 15px;
+            color: var(--border);
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>Kirim Notifikasi WhatsApp</h1>
+        <h1><i class="fas fa-comment-dots"></i> Kirim Notifikasi WhatsApp</h1>
 
         <div class="template-box">
-            <h2>1. Buat Template Pesan</h2>
+            <h2><i class="fas fa-edit"></i> 1. Buat Template Pesan</h2>
             <p>Gunakan variabel dinamis. Variabel akan otomatis diganti sesuai data di setiap baris.</p>
-            <textarea id="message-template" rows="6" placeholder="Contoh: Assalamualaikum Bapak/Ibu wali dari [[Nama_Siswa]], kami ingin menginformasikan bahwa... Terima kasih."></textarea>
+            <textarea id="message-template" rows="6" placeholder="Contoh: 
+Assalamualaikum Bapak/Ibu wali dari [[Nama_Siswa]], 
+
+Kami ingin menginformasikan bahwa... 
+
+Terima kasih."></textarea>
             <div class="variables">
                 <strong>Variabel Tersedia:</strong> [[No]], [[NIS]], [[Nama_Siswa]], [[WA_Siswa]], [[WA_Ayah]], [[WA_Ibu]], [[id_file_google]]
             </div>
         </div>
 
-        <h2 style="text-align:left; margin-top:30px;">2. Pilih Penerima dan Kirim</h2>
-        <div id="status-message">Memuat data siswa, mohon tunggu...</div>
+        <h2><i class="fas fa-users"></i> 2. Pilih Penerima dan Kirim</h2>
+        
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-box" placeholder="Cari nama siswa atau NIS..." onkeyup="filterTable()">
+            <button class="filter-btn active" onclick="filterTable('all')">Semua</button>
+            <button class="filter-btn" onclick="filterTable('student')">Siswa</button>
+            <button class="filter-btn" onclick="filterTable('parent')">Orang Tua</button>
+        </div>
+        
+        <div id="status-message">
+            <div class="loading-spinner"></div>
+            <div>Memuat data siswa, mohon tunggu...</div>
+        </div>
 
         <table id="dataTable" class="hidden">
             <thead>
@@ -128,9 +425,21 @@
                 </tr>
             </thead>
             <tbody id="data-container">
-                </tbody>
+                <!-- Data akan dimuat di sini -->
+            </tbody>
         </table>
+        
+        <div id="emptyState" class="empty-state hidden">
+            <i class="fas fa-user-graduate"></i>
+            <h3>Tidak ada data yang cocok</h3>
+            <p>Coba gunakan kata kunci pencarian yang berbeda</p>
+        </div>
     </div>
+    
+    <button class="fab tooltip" onclick="scrollToTop()" title="Kembali ke atas">
+        <i class="fas fa-arrow-up"></i>
+        <span class="tooltiptext">Kembali ke atas</span>
+    </button>
 
     <script>
         // ===================================================================
@@ -139,11 +448,14 @@
 
         // Deklarasikan variabel data di luar fungsi agar bisa diakses oleh event listener
         let fetchedData = [];
+        let filteredData = [];
 
         document.addEventListener('DOMContentLoaded', () => {
             const dataContainer = document.getElementById('data-container');
             const statusMessage = document.getElementById('status-message');
             const dataTable = document.getElementById('dataTable');
+            const emptyState = document.getElementById('emptyState');
+            const searchInput = document.getElementById('searchInput');
 
             async function loadData() {
                 try {
@@ -151,9 +463,10 @@
                     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
                     
                     fetchedData = await response.json();
+                    filteredData = [...fetchedData];
                     
                     if (fetchedData.length === 0) {
-                        statusMessage.textContent = 'Tidak ada data untuk ditampilkan.';
+                        statusMessage.innerHTML = '<i class="fas fa-exclamation-circle"></i><div>Tidak ada data untuk ditampilkan.</div>';
                         return;
                     }
 
@@ -163,31 +476,47 @@
 
                 } catch (error) {
                     console.error('Gagal mengambil data:', error);
-                    statusMessage.textContent = 'Gagal memuat data. Periksa URL atau koneksi internet.';
-                    statusMessage.classList.add('error');
+                    statusMessage.innerHTML = '<i class="fas fa-exclamation-triangle"></i><div class="error">Gagal memuat data. Periksa URL atau koneksi internet.</div>';
                 }
             }
 
             function renderTable(data) {
                 dataContainer.innerHTML = '';
+                
+                if (data.length === 0) {
+                    dataTable.classList.add('hidden');
+                    emptyState.classList.remove('hidden');
+                    return;
+                }
+                
+                emptyState.classList.add('hidden');
+                dataTable.classList.remove('hidden');
+                
                 data.forEach((item, index) => {
                     const row = document.createElement('tr');
                     
                     // Membuat tombol kirim secara dinamis
-                    let actionsHtml = '';
+                    let actionsHtml = '<div class="btn-container">';
                     if (item.WA_Siswa) {
-                        actionsHtml += `<button class="send-btn student" data-index="${index}" data-phone="${item.WA_Siswa}">Siswa</button>`;
+                        actionsHtml += `<button class="send-btn student" data-index="${index}" data-phone="${item.WA_Siswa}" title="Kirim ke siswa">
+                            <i class="fas fa-user-graduate"></i> Siswa
+                        </button>`;
                     }
                     if (item.WA_Ayah) {
-                        actionsHtml += `<button class="send-btn parent" data-index="${index}" data-phone="${item.WA_Ayah}">Ayah</button>`;
+                        actionsHtml += `<button class="send-btn parent" data-index="${index}" data-phone="${item.WA_Ayah}" title="Kirim ke ayah">
+                            <i class="fas fa-male"></i> Ayah
+                        </button>`;
                     }
                     if (item.WA_Ibu) {
-                        actionsHtml += `<button class="send-btn parent" data-index="${index}" data-phone="${item.WA_Ibu}">Ibu</button>`;
+                        actionsHtml += `<button class="send-btn parent" data-index="${index}" data-phone="${item.WA_Ibu}" title="Kirim ke ibu">
+                            <i class="fas fa-female"></i> Ibu
+                        </button>`;
                     }
+                    actionsHtml += '</div>';
 
                     row.innerHTML = `
                         <td>${item.No}</td>
-                        <td>${item.NIS}</td>
+                        <td>${item.NIS || '-'}</td>
                         <td>${item.Nama_Siswa}</td>
                         <td>${actionsHtml || '-'}</td>
                     `;
@@ -198,35 +527,121 @@
             // Event listener untuk semua tombol kirim (menggunakan event delegation)
             dataTable.addEventListener('click', function(event) {
                 // Hanya jalankan jika yang diklik adalah tombol dengan class 'send-btn'
-                if (event.target.classList.contains('send-btn')) {
-                    const template = document.getElementById('message-template').value;
-                    if (!template) {
-                        alert('Harap isi template pesan terlebih dahulu.');
-                        return;
-                    }
-
-                    // Ambil data dari atribut tombol yang diklik
-                    const index = event.target.dataset.index;
-                    const phone = event.target.dataset.phone;
-                    const studentData = fetchedData[index];
-
-                    // Ganti semua variabel di template dengan data siswa yang sesuai
-                    let finalMessage = template;
-                    for (const key in studentData) {
-                        finalMessage = finalMessage.replace(new RegExp(`\\[\\[${key}\\]\\]`, 'g'), studentData[key]);
-                    }
-
-                    // Encode pesan untuk URL dan buka link wa.me
-                    const encodedMessage = encodeURIComponent(finalMessage);
-                    const waUrl = `https://wa.me/${phone}?text=${encodedMessage}`;
-                    
-                    window.open(waUrl, '_blank');
+                if (event.target.closest('.send-btn')) {
+                    const btn = event.target.closest('.send-btn');
+                    sendMessage(btn);
                 }
             });
+            
+            // Fungsi untuk mengirim pesan
+            function sendMessage(btn) {
+                const template = document.getElementById('message-template').value;
+                if (!template) {
+                    showAlert('Harap isi template pesan terlebih dahulu.', 'error');
+                    document.getElementById('message-template').focus();
+                    return;
+                }
+
+                // Ambil data dari atribut tombol yang diklik
+                const index = btn.dataset.index;
+                const phone = btn.dataset.phone;
+                const studentData = filteredData[index];
+
+                // Ganti semua variabel di template dengan data siswa yang sesuai
+                let finalMessage = template;
+                for (const key in studentData) {
+                    if (studentData[key] === null || studentData[key] === undefined) {
+                        finalMessage = finalMessage.replace(new RegExp(`\\[\\[${key}\\]\\]`, 'g'), '-');
+                    } else {
+                        finalMessage = finalMessage.replace(new RegExp(`\\[\\[${key}\\]\\]`, 'g'), studentData[key]);
+                    }
+                }
+
+                // Encode pesan untuk URL dan buka link wa.me
+                const encodedMessage = encodeURIComponent(finalMessage);
+                const waUrl = `https://wa.me/${phone}?text=${encodedMessage}`;
+                
+                window.open(waUrl, '_blank');
+            }
+            
+            // Fungsi untuk menampilkan alert
+            function showAlert(message, type = 'success') {
+                const alertDiv = document.createElement('div');
+                alertDiv.className = `alert ${type}`;
+                alertDiv.innerHTML = `
+                    <i class="fas ${type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle'}"></i>
+                    ${message}
+                `;
+                
+                document.body.appendChild(alertDiv);
+                
+                setTimeout(() => {
+                    alertDiv.classList.add('fade-out');
+                    setTimeout(() => {
+                        alertDiv.remove();
+                    }, 500);
+                }, 3000);
+            }
 
             // Mulai proses
             loadData();
         });
+        
+        // Fungsi untuk filter tabel
+        function filterTable(type = 'all') {
+            const searchInput = document.getElementById('searchInput');
+            const searchTerm = searchInput.value.toLowerCase();
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            
+            // Update active button
+            filterButtons.forEach(btn => {
+                btn.classList.remove('active');
+                if ((type === 'all' && btn.textContent === 'Semua') || 
+                    (type === 'student' && btn.textContent === 'Siswa') || 
+                    (type === 'parent' && btn.textContent === 'Orang Tua')) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Filter data
+            filteredData = fetchedData.filter(item => {
+                // Filter berdasarkan search term
+                const matchesSearch = 
+                    (item.Nama_Siswa && item.Nama_Siswa.toLowerCase().includes(searchTerm)) || 
+                    (item.NIS && item.NIS.toString().includes(searchTerm));
+                
+                // Filter berdasarkan type
+                let matchesType = true;
+                if (type === 'student') {
+                    matchesType = item.WA_Siswa;
+                } else if (type === 'parent') {
+                    matchesType = item.WA_Ayah || item.WA_Ibu;
+                }
+                
+                return matchesSearch && matchesType;
+            });
+            
+            // Render tabel dengan data yang sudah difilter
+            renderTable(filteredData);
+        }
+        
+        // Fungsi untuk scroll ke atas
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+        
+        // Tampilkan/menyembunyikan tombol scroll to top
+        window.onscroll = function() {
+            const fab = document.querySelector('.fab');
+            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                fab.style.display = 'flex';
+            } else {
+                fab.style.display = 'none';
+            }
+        };
     </script>
 
 </body>
