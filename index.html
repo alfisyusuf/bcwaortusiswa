@@ -2,868 +2,325 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kirim Pesan WhatsApp</title>
-    <!-- Tailwind CSS -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>WhatsApp Blaster v3.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Custom Styles -->
     <style>
-        /* Custom checkbox */
-        .custom-checkbox {
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            width: 20px;
-            height: 20px;
-            border: 2px solid #e2e8f0;
-            border-radius: 4px;
-            cursor: pointer;
-            position: relative;
-            transition: all 0.2s;
-        }
-        
-        .custom-checkbox:checked {
-            background-color: #3b82f6;
-            border-color: #3b82f6;
-        }
-        
-        .custom-checkbox:checked::after {
-            content: '\f00c';
-            font-family: 'Font Awesome 6 Free';
-            font-weight: 900;
-            position: absolute;
-            color: white;
-            font-size: 12px;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-        
-        /* Mobile-optimized table */
-        @media (max-width: 768px) {
-            .mobile-table-row {
-                display: flex;
-                flex-direction: column;
-                padding: 12px;
-                border-bottom: 1px solid #e2e8f0;
-                background: white;
-                margin-bottom: 8px;
-                border-radius: 8px;
-                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            }
-            
-            .mobile-table-header {
+        /* Mencegah highlight biru saat elemen disentuh di mobile */
+        * { -webkit-tap-highlight-color: transparent; }
+
+        /* TEKNIK CSS UNTUK MENGUBAH TABEL MENJADI KARTU DI MOBILE */
+        @media (max-width: 767px) {
+            #desktop-table thead {
                 display: none;
             }
-            
-            .mobile-table-cell {
+            #desktop-table tr {
+                display: block;
+                margin-bottom: 1rem;
+                border-radius: 0.75rem;
+                border: 1px solid #e5e7eb;
+                box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+                background: white;
+            }
+            #desktop-table td {
                 display: flex;
                 justify-content: space-between;
-                padding: 6px 0;
+                align-items: center;
+                padding: 0.8rem 1rem;
+                border-bottom: 1px solid #f3f4f6;
             }
-            
-            .mobile-table-cell:before {
+            #desktop-table td:last-child {
+                border-bottom: none;
+                background-color: #f9fafb;
+                padding-top: 1rem;
+                padding-bottom: 1rem;
+            }
+            #desktop-table td::before {
                 content: attr(data-label);
                 font-weight: 600;
-                color: #4a5568;
-                margin-right: 10px;
+                color: #4b5563;
+                font-size: 0.875rem;
             }
-            
-            .mobile-actions {
+            #desktop-table .action-buttons {
                 display: flex;
-                gap: 8px;
                 flex-wrap: wrap;
-                margin-top: 8px;
+                gap: 0.5rem;
+                justify-content: flex-end;
+                flex-grow: 1;
             }
-            
-            .mobile-action-btn {
-                flex: 1;
-                min-width: 100px;
-                text-align: center;
+            #desktop-table .action-buttons button {
+                flex-grow: 1;
             }
-        }
-        
-        /* Bottom action bar for mobile */
-        .mobile-action-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: white;
-            padding: 12px;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 100;
-        }
-        
-        /* Tab navigation for mobile */
-        .mobile-tab-container {
-            position: fixed;
-            bottom: 70px;
-            left: 0;
-            right: 0;
-            background: white;
-            z-index: 90;
-            padding: 10px;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-            display: none;
-        }
-        
-        .mobile-tab-content {
-            max-height: 60vh;
-            overflow-y: auto;
-            padding: 10px;
-        }
-        
-        /* Loading spinner */
-        .loading-spinner {
-            border: 3px solid rgba(0,0,0,0.1);
-            border-radius: 50%;
-            border-top: 3px solid #3b82f6;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen pb-20">
-    <!-- Notification Toast -->
-    <div id="toast" class="fixed top-5 right-5 left-5 sm:left-auto z-50 hidden">
-        <div class="flex items-center p-4 rounded-lg shadow-lg bg-white border-l-4 border-green-500">
-            <i id="toast-icon" class="fas fa-check-circle mr-3 text-xl text-green-500"></i>
-            <span id="toast-message" class="text-sm">Pesan berhasil dikirim!</span>
+<body class="bg-gray-100 font-sans pb-24 sm:pb-4">
+
+    <div id="toast" class="fixed top-5 right-5 z-50 hidden max-w-sm">
+        <div class="flex items-center p-4 rounded-lg shadow-lg bg-white border-l-4">
+            <i id="toast-icon"></i>
+            <span id="toast-message" class="ml-3 text-sm font-medium"></span>
         </div>
     </div>
 
-    <div class="container mx-auto px-4 py-4 max-w-6xl">
-        <!-- Mobile Toggle Buttons -->
-        <div class="flex sm:hidden mb-4 bg-white rounded-lg shadow p-1">
-            <button id="template-tab-btn" class="flex-1 py-2 px-4 rounded-md font-medium text-blue-600 bg-blue-50">
-                <i class="fas fa-edit mr-2"></i> Template
-            </button>
-            <button id="recipient-tab-btn" class="flex-1 py-2 px-4 rounded-md font-medium text-gray-600">
-                <i class="fas fa-users mr-2"></i> Penerima
-            </button>
+    <div class="container mx-auto max-w-7xl px-2 sm:px-4 py-4">
+        <div class="sm:hidden flex bg-white rounded-lg shadow-sm p-1 mb-4">
+            <button id="template-tab-btn" class="flex-1 py-2 px-3 text-sm font-semibold rounded-md bg-blue-600 text-white transition-all duration-300"><i class="fas fa-edit mr-2"></i>Template</button>
+            <button id="recipient-tab-btn" class="flex-1 py-2 px-3 text-sm font-semibold rounded-md text-gray-600 transition-all duration-300"><i class="fas fa-users mr-2"></i>Penerima</button>
         </div>
 
-        <!-- Mobile Tab Container -->
-        <div id="mobile-tab-container" class="mobile-tab-container">
-            <div id="mobile-tab-content" class="mobile-tab-content"></div>
-        </div>
-
-        <!-- Template Section (Hidden on mobile by default) -->
-        <div id="template-section" class="hidden sm:block bg-white rounded-xl shadow-md overflow-hidden mb-6">
-            <div class="p-4 sm:p-6">
-                <div class="flex items-center mb-4">
-                    <div class="bg-blue-100 p-2 rounded-lg mr-3">
-                        <i class="fas fa-edit text-blue-500"></i>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div id="template-section" class="lg:col-span-1">
+                <div class="bg-white rounded-xl shadow-md p-5 sticky top-4">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Template Pesan</h2>
+                    <textarea id="message-template" rows="10" class="w-full text-sm p-3 border rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="Contoh: Assalamualaikum, kami mengundang Bapak/Ibu wali dari [[Nama_Siswa]]..."></textarea>
+                    <div class="text-xs text-gray-500 mt-2 mb-4">Variabel: [[Nama_Siswa]], [[NIS]]</div>
+                    <div class="flex justify-end gap-3">
+                        <button id="preview-btn" class="px-4 py-2 bg-gray-200 text-gray-800 text-sm font-semibold rounded-lg hover:bg-gray-300"><i class="fas fa-eye mr-2"></i>Preview</button>
+                        <button id="save-template-btn" class="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700"><i class="fas fa-save mr-2"></i>Simpan</button>
                     </div>
-                    <h2 class="text-xl font-semibold text-gray-800">Template Pesan</h2>
-                </div>
-                
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Variabel Tersedia:</label>
-                    <div class="flex flex-wrap gap-2 mb-4">
-                        <span class="bg-gray-100 px-3 py-1 rounded-full text-xs text-gray-700">[[No]]</span>
-                        <span class="bg-gray-100 px-3 py-1 rounded-full text-xs text-gray-700">[[NIS]]</span>
-                        <span class="bg-gray-100 px-3 py-1 rounded-full text-xs text-gray-700">[[Nama_Siswa]]</span>
-                        <span class="bg-gray-100 px-3 py-1 rounded-full text-xs text-gray-700">[[WA_Siswa]]</span>
-                        <span class="bg-gray-100 px-3 py-1 rounded-full text-xs text-gray-700">[[WA_Ayah]]</span>
-                        <span class="bg-gray-100 px-3 py-1 rounded-full text-xs text-gray-700">[[WA_Ibu]]</span>
-                        <span class="bg-gray-100 px-3 py-1 rounded-full text-xs text-gray-700">[[id_file_google]]</span>
-                    </div>
-                </div>
-                
-                <textarea id="message-template" rows="8" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200" placeholder="Contoh: 
-Assalamualaikum Bapak/Ibu wali dari [[Nama_Siswa]], 
-
-Kami ingin menginformasikan bahwa... 
-
-Terima kasih."></textarea>
-                
-                <div class="mt-4 flex justify-between items-center">
-                    <button id="preview-btn" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition flex items-center text-sm">
-                        <i class="fas fa-eye mr-2"></i> Preview
-                    </button>
-                    <button id="save-template-btn" class="px-4 py-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition flex items-center text-sm">
-                        <i class="fas fa-save mr-2"></i> Simpan
-                    </button>
                 </div>
             </div>
-        </div>
 
-        <!-- Data Section -->
-        <div id="recipient-section" class="bg-white rounded-xl shadow-md overflow-hidden">
-            <div class="p-4 sm:p-6 border-b border-gray-200">
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
-                    <div class="flex items-center mb-4 sm:mb-0">
-                        <div class="bg-green-100 p-2 rounded-lg mr-3 hidden sm:block">
-                            <i class="fas fa-users text-green-500"></i>
+            <div id="recipient-section" class="lg:col-span-2 hidden sm:block">
+                <div class="bg-white rounded-xl shadow-md">
+                    <div class="p-5 border-b">
+                        <h2 class="text-xl font-bold text-gray-800 mb-4">Daftar Penerima</h2>
+                        <input type="text" id="searchInput" class="w-full text-sm border rounded-lg p-3 focus:ring-2 focus:ring-blue-500" placeholder="Cari nama atau NIS...">
+                    </div>
+                    <div class="p-5 hidden sm:flex justify-between items-center border-b">
+                        <div class="flex items-center">
+                            <input type="checkbox" id="selectAllHeader" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-0 mr-2">
+                            <label for="selectAllHeader" class="text-sm">Pilih Semua yang Tampil</label>
                         </div>
-                        <h2 class="text-xl font-semibold text-gray-800">Daftar Penerima</h2>
+                        <button id="bulk-send-btn" class="px-4 py-2 bg-green-500 text-white text-sm font-semibold rounded-lg hover:bg-green-600 disabled:opacity-50" disabled><i class="fas fa-paper-plane mr-2"></i>Kirim Massal</button>
                     </div>
                     
-                    <div class="flex flex-col sm:flex-row gap-3">
-                        <div class="relative flex-grow">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="fas fa-search text-gray-400"></i>
-                            </div>
-                            <input type="text" id="searchInput" class="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 text-sm" placeholder="Cari siswa...">
-                        </div>
-                        <select id="filterSelect" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 text-sm">
-                            <option value="all">Semua</option>
-                            <option value="student">Siswa</option>
-                            <option value="parent">Orang Tua</option>
-                        </select>
+                    <div id="status-message" class="text-center p-10"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div><p class="mt-4 text-sm text-gray-500">Memuat data...</p></div>
+                    <div id="data-container" class="hidden">
+                        <table id="desktop-table" class="min-w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="p-4"></th>
+                                    <th class="p-4 text-left text-xs font-medium text-gray-500 uppercase">Siswa</th>
+                                    <th class="p-4 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dataTableBody" class="bg-white divide-y divide-gray-200"></tbody>
+                        </table>
                     </div>
+                    <div id="emptyState" class="hidden text-center p-10"><i class="fas fa-search text-4xl text-gray-300"></i><p class="mt-4 text-sm text-gray-500">Data tidak ditemukan.</p></div>
                 </div>
-                
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center">
-                        <input type="checkbox" id="selectAll" class="custom-checkbox mr-2">
-                        <label for="selectAll" class="text-sm text-gray-600">Pilih Semua</label>
-                    </div>
-                    <button id="bulk-send-btn" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition flex items-center disabled:opacity-50 text-sm" disabled>
-                        <i class="fas fa-paper-plane mr-2"></i> <span class="hidden sm:inline">Kirim Massal</span>
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Loading State -->
-            <div id="status-message" class="p-8 text-center">
-                <div class="loading-spinner"></div>
-                <p class="text-gray-600">Memuat data siswa, mohon tunggu...</p>
-            </div>
-            
-            <!-- Desktop Table -->
-            <div id="desktop-table" class="hidden sm:block overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                <input type="checkbox" id="selectAllHeader" class="custom-checkbox">
-                            </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Siswa</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NIS</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="dataTable" class="bg-white divide-y divide-gray-200">
-                        <!-- Data will be loaded here -->
-                    </tbody>
-                </table>
-            </div>
-            
-            <!-- Mobile Table -->
-            <div id="mobile-table" class="sm:hidden p-4">
-                <div id="mobile-data-container">
-                    <!-- Mobile data will be loaded here -->
-                </div>
-            </div>
-            
-            <!-- Empty State -->
-            <div id="emptyState" class="hidden p-10 text-center">
-                <i class="fas fa-user-graduate text-5xl text-gray-300 mb-4"></i>
-                <h3 class="text-lg font-medium text-gray-700 mb-2">Tidak ada data yang cocok</h3>
-                <p class="text-gray-500">Coba gunakan kata kunci pencarian yang berbeda</p>
             </div>
         </div>
     </div>
 
-    <!-- Mobile Action Bar -->
-    <div class="mobile-action-bar sm:hidden">
+    <div id="mobile-action-bar" class="sm:hidden fixed bottom-0 left-0 right-0 bg-white p-3 shadow-[0_-2px_10px_rgba(0,0,0,0.1)] flex justify-between items-center">
         <div class="flex items-center">
-            <input type="checkbox" id="mobile-select-all" class="custom-checkbox mr-2">
-            <label for="mobile-select-all" class="text-sm text-gray-600">Pilih Semua</label>
+            <input type="checkbox" id="selectAllFooter" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-0 mr-2">
+            <label for="selectAllFooter" class="text-sm">Pilih Semua</label>
         </div>
-        <button id="mobile-bulk-send-btn" class="px-4 py-2 bg-green-500 text-white rounded-lg flex items-center disabled:opacity-50 text-sm" disabled>
-            <i class="fas fa-paper-plane mr-2"></i> Kirim
-        </button>
+        <button id="mobile-bulk-send-btn" class="px-4 py-2 bg-green-500 text-white text-sm font-semibold rounded-lg hover:bg-green-600 disabled:opacity-50" disabled><i class="fas fa-paper-plane mr-2"></i>Kirim</button>
     </div>
 
-    <!-- Preview Modal -->
-    <div id="preview-modal" class="fixed inset-0 z-50 hidden overflow-y-auto">
-        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+    <div id="preview-modal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-lg w-full">
+            <div class="p-5 border-b flex justify-between items-center">
+                <h3 class="text-lg font-bold">Pratinjau Pesan</h3>
+                <button id="close-preview-btn" class="text-gray-400 hover:text-gray-800">&times;</button>
             </div>
-            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                    <div class="sm:flex sm:items-start">
-                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
-                            <i class="fas fa-eye text-blue-600"></i>
-                        </div>
-                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                            <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Pratinjau Pesan</h3>
-                            <div class="mt-4">
-                                <div class="border border-gray-200 rounded-lg p-4 bg-gray-50 max-h-96 overflow-y-auto">
-                                    <pre id="preview-content" class="whitespace-pre-wrap font-sans"></pre>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                    <button type="button" id="send-from-preview" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm">
-                        <i class="fas fa-paper-plane mr-2"></i> Kirim Pesan
-                    </button>
-                    <button type="button" id="close-preview" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                        Tutup
-                    </button>
-                </div>
-            </div>
+            <div class="p-5 max-h-96 overflow-y-auto"><pre id="preview-content" class="whitespace-pre-wrap font-sans text-sm"></pre></div>
+            <div class="p-4 bg-gray-50 flex justify-end"><button id="close-preview-btn-2" class="px-4 py-2 bg-gray-200 text-sm font-semibold rounded-lg">Tutup</button></div>
         </div>
     </div>
 
     <script>
-        // ===================================================================
         const webAppUrl = 'https://script.google.com/macros/s/AKfycbz3nCIRHCMaUQy6LJcF6eZoD8TiQmJIVFsAygGRgHyxGwnDrKsOb5z_6Y96N0XHgyCNxw/exec';
-        // ===================================================================
-
-        // Global variables
-        let fetchedData = [];
-        let filteredData = [];
-        let selectedStudents = new Set();
-        let currentPreviewIndex = null;
-        let currentPreviewPhone = null;
+        let fetchedData = [], filteredData = [], selectedIndices = new Set();
+        
+        const dom = {
+            templateSection: document.getElementById('template-section'),
+            recipientSection: document.getElementById('recipient-section'),
+            templateTabBtn: document.getElementById('template-tab-btn'),
+            recipientTabBtn: document.getElementById('recipient-tab-btn'),
+            dataTableBody: document.getElementById('dataTableBody'),
+            searchInput: document.getElementById('searchInput'),
+            selectAllHeader: document.getElementById('selectAllHeader'),
+            selectAllFooter: document.getElementById('selectAllFooter'),
+            bulkSendBtn: document.getElementById('bulk-send-btn'),
+            mobileBulkSendBtn: document.getElementById('mobile-bulk-send-btn'),
+            statusMessage: document.getElementById('status-message'),
+            dataContainer: document.getElementById('data-container'),
+            emptyState: document.getElementById('emptyState'),
+            messageTemplate: document.getElementById('message-template'),
+            previewModal: document.getElementById('preview-modal'),
+            previewContent: document.getElementById('preview-content'),
+        };
 
         document.addEventListener('DOMContentLoaded', () => {
-            // DOM Elements
-            const templateSection = document.getElementById('template-section');
-            const recipientSection = document.getElementById('recipient-section');
-            const templateTabBtn = document.getElementById('template-tab-btn');
-            const recipientTabBtn = document.getElementById('recipient-tab-btn');
-            const mobileTabContainer = document.getElementById('mobile-tab-container');
-            const mobileTabContent = document.getElementById('mobile-tab-content');
-            const dataContainer = document.getElementById('data-container');
-            const mobileDataContainer = document.getElementById('mobile-data-container');
-            const statusMessage = document.getElementById('status-message');
-            const desktopTable = document.getElementById('desktop-table');
-            const emptyState = document.getElementById('emptyState');
-            const searchInput = document.getElementById('searchInput');
-            const filterSelect = document.getElementById('filterSelect');
-            const selectAll = document.getElementById('selectAll');
-            const selectAllHeader = document.getElementById('selectAllHeader');
-            const mobileSelectAll = document.getElementById('mobile-select-all');
-            const bulkSendBtn = document.getElementById('bulk-send-btn');
-            const mobileBulkSendBtn = document.getElementById('mobile-bulk-send-btn');
-            const previewBtn = document.getElementById('preview-btn');
-            const saveTemplateBtn = document.getElementById('save-template-btn');
-            const previewModal = document.getElementById('preview-modal');
-            const closePreview = document.getElementById('close-preview');
-            const sendFromPreview = document.getElementById('send-from-preview');
-            const previewContent = document.getElementById('preview-content');
-            const toast = document.getElementById('toast');
-
-            // Initialize the app
             loadData();
-
-            // Event listeners for mobile tabs
-            templateTabBtn.addEventListener('click', () => {
-                templateTabBtn.classList.add('text-blue-600', 'bg-blue-50');
-                recipientTabBtn.classList.remove('text-blue-600', 'bg-blue-50');
-                templateSection.classList.remove('hidden');
-                recipientSection.classList.add('hidden');
-                mobileTabContainer.style.display = 'none';
-            });
-
-            recipientTabBtn.addEventListener('click', () => {
-                recipientTabBtn.classList.add('text-blue-600', 'bg-blue-50');
-                templateTabBtn.classList.remove('text-blue-600', 'bg-blue-50');
-                templateSection.classList.add('hidden');
-                recipientSection.classList.remove('hidden');
-                mobileTabContainer.style.display = 'none';
-            });
-
-            // Other event listeners
-            searchInput.addEventListener('input', () => filterTable());
-            filterSelect.addEventListener('change', () => filterTable());
-            selectAll.addEventListener('change', toggleSelectAll);
-            selectAllHeader.addEventListener('change', toggleSelectAll);
-            mobileSelectAll.addEventListener('change', toggleSelectAll);
-            bulkSendBtn.addEventListener('click', sendBulkMessages);
-            mobileBulkSendBtn.addEventListener('click', sendBulkMessages);
-            previewBtn.addEventListener('click', showPreview);
-            saveTemplateBtn.addEventListener('click', saveTemplate);
-            closePreview.addEventListener('click', () => previewModal.classList.add('hidden'));
-            sendFromPreview.addEventListener('click', sendFromPreviewHandler);
-
-            // Load data from server
-            async function loadData() {
-                try {
-                    const response = await fetch(webAppUrl);
-                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-                    
-                    fetchedData = await response.json();
-                    filteredData = [...fetchedData];
-                    
-                    if (fetchedData.length === 0) {
-                        showEmptyState();
-                        return;
-                    }
-
-                    renderTables();
-                    statusMessage.classList.add('hidden');
-                    desktopTable.classList.remove('hidden');
-
-                } catch (error) {
-                    console.error('Gagal mengambil data:', error);
-                    statusMessage.innerHTML = `
-                        <div class="text-red-500 font-medium">
-                            <i class="fas fa-exclamation-triangle mr-2"></i> Gagal memuat data. Periksa URL atau koneksi internet.
-                        </div>
-                    `;
-                }
-            }
-
-            // Render both desktop and mobile tables
-            function renderTables() {
-                if (filteredData.length === 0) {
-                    showEmptyState();
-                    return;
-                }
-                
-                emptyState.classList.add('hidden');
-                desktopTable.classList.remove('hidden');
-                
-                renderDesktopTable();
-                renderMobileTable();
-            }
-
-            // Render desktop table
-            function renderDesktopTable() {
-                let tableHTML = '';
-                
-                filteredData.forEach((item, index) => {
-                    const isSelected = selectedStudents.has(index);
-                    
-                    // Prepare action buttons
-                    let actionsHTML = '<div class="flex gap-2">';
-                    
-                    if (item.WA_Siswa) {
-                        actionsHTML += `
-                            <button class="student-btn px-3 py-1 bg-green-100 text-green-700 rounded-md text-xs hover:bg-green-200 transition flex items-center" 
-                                data-index="${index}" data-phone="${item.WA_Siswa}">
-                                <i class="fas fa-user-graduate mr-1"></i> Siswa
-                            </button>`;
-                    }
-                    
-                    if (item.WA_Ayah) {
-                        actionsHTML += `
-                            <button class="parent-btn px-3 py-1 bg-blue-100 text-blue-700 rounded-md text-xs hover:bg-blue-200 transition flex items-center" 
-                                data-index="${index}" data-phone="${item.WA_Ayah}">
-                                <i class="fas fa-male mr-1"></i> Ayah
-                            </button>`;
-                    }
-                    
-                    if (item.WA_Ibu) {
-                        actionsHTML += `
-                            <button class="parent-btn px-3 py-1 bg-purple-100 text-purple-700 rounded-md text-xs hover:bg-purple-200 transition flex items-center" 
-                                data-index="${index}" data-phone="${item.WA_Ibu}">
-                                <i class="fas fa-female mr-1"></i> Ibu
-                            </button>`;
-                    }
-                    
-                    actionsHTML += '</div>';
-                    
-                    tableHTML += `
-                        <tr class="${isSelected ? 'bg-blue-50' : ''}">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <input type="checkbox" class="custom-checkbox student-checkbox" 
-                                    data-index="${index}" ${isSelected ? 'checked' : ''}>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">${item.Nama_Siswa}</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-500">${item.NIS || '-'}</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                ${actionsHTML}
-                            </td>
-                        </tr>
-                    `;
-                });
-                
-                document.getElementById('dataTable').innerHTML = tableHTML;
-                
-                // Add event listeners to checkboxes and buttons
-                addTableEventListeners();
-            }
-
-            // Render mobile-friendly table
-            function renderMobileTable() {
-                let mobileHTML = '';
-                
-                filteredData.forEach((item, index) => {
-                    const isSelected = selectedStudents.has(index);
-                    
-                    // Prepare action buttons
-                    let actionsHTML = '<div class="mobile-actions">';
-                    
-                    if (item.WA_Siswa) {
-                        actionsHTML += `
-                            <button class="mobile-action-btn student-btn px-3 py-2 bg-green-100 text-green-700 rounded-md text-xs hover:bg-green-200 transition flex items-center justify-center" 
-                                data-index="${index}" data-phone="${item.WA_Siswa}">
-                                <i class="fas fa-user-graduate mr-1"></i> Siswa
-                            </button>`;
-                    }
-                    
-                    if (item.WA_Ayah) {
-                        actionsHTML += `
-                            <button class="mobile-action-btn parent-btn px-3 py-2 bg-blue-100 text-blue-700 rounded-md text-xs hover:bg-blue-200 transition flex items-center justify-center" 
-                                data-index="${index}" data-phone="${item.WA_Ayah}">
-                                <i class="fas fa-male mr-1"></i> Ayah
-                            </button>`;
-                    }
-                    
-                    if (item.WA_Ibu) {
-                        actionsHTML += `
-                            <button class="mobile-action-btn parent-btn px-3 py-2 bg-purple-100 text-purple-700 rounded-md text-xs hover:bg-purple-200 transition flex items-center justify-center" 
-                                data-index="${index}" data-phone="${item.WA_Ibu}">
-                                <i class="fas fa-female mr-1"></i> Ibu
-                            </button>`;
-                    }
-                    
-                    actionsHTML += '</div>';
-                    
-                    mobileHTML += `
-                        <div class="mobile-table-row ${isSelected ? 'bg-blue-50' : ''}">
-                            <div class="mobile-table-cell" data-label="Pilih">
-                                <input type="checkbox" class="custom-checkbox mobile-student-checkbox" 
-                                    data-index="${index}" ${isSelected ? 'checked' : ''}>
-                            </div>
-                            <div class="mobile-table-cell" data-label="Nama">
-                                <div class="text-sm font-medium text-gray-900">${item.Nama_Siswa}</div>
-                            </div>
-                            <div class="mobile-table-cell" data-label="NIS">
-                                <div class="text-sm text-gray-500">${item.NIS || '-'}</div>
-                            </div>
-                            ${actionsHTML}
-                        </div>
-                    `;
-                });
-                
-                mobileDataContainer.innerHTML = mobileHTML;
-                
-                // Add event listeners to checkboxes and buttons
-                addTableEventListeners();
-            }
-
-            // Add event listeners to table elements
-            function addTableEventListeners() {
-                // Checkboxes
-                document.querySelectorAll('.student-checkbox, .mobile-student-checkbox').forEach(checkbox => {
-                    checkbox.addEventListener('change', function() {
-                        const index = parseInt(this.dataset.index);
-                        if (this.checked) {
-                            selectedStudents.add(index);
-                        } else {
-                            selectedStudents.delete(index);
-                        }
-                        updateBulkSendButtons();
-                        updateSelectAllCheckboxes();
-                    });
-                });
-                
-                // Action buttons
-                document.querySelectorAll('.student-btn, .parent-btn').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        sendMessage(this);
-                    });
-                });
-            }
-
-            // Filter table based on search and filter criteria
-            function filterTable() {
-                const searchTerm = searchInput.value.toLowerCase();
-                const filterType = filterSelect.value;
-                
-                filteredData = fetchedData.filter(item => {
-                    // Filter by search term
-                    const matchesSearch = 
-                        (item.Nama_Siswa && item.Nama_Siswa.toLowerCase().includes(searchTerm)) || 
-                        (item.NIS && item.NIS.toString().includes(searchTerm));
-                    
-                    // Filter by type
-                    let matchesType = true;
-                    if (filterType === 'student') {
-                        matchesType = item.WA_Siswa;
-                    } else if (filterType === 'parent') {
-                        matchesType = item.WA_Ayah || item.WA_Ibu;
-                    }
-                    
-                    return matchesSearch && matchesType;
-                });
-                
-                renderTables();
-            }
-
-            // Show empty state when no data matches
-            function showEmptyState() {
-                desktopTable.classList.add('hidden');
-                mobileDataContainer.innerHTML = '';
-                statusMessage.classList.add('hidden');
-                emptyState.classList.remove('hidden');
-            }
-
-            // Toggle select all checkboxes
-            function toggleSelectAll() {
-                const isChecked = this.checked;
-                
-                if (isChecked) {
-                    filteredData.forEach((_, index) => {
-                        selectedStudents.add(index);
-                    });
-                } else {
-                    selectedStudents.clear();
-                }
-                
-                // Update all checkboxes
-                document.querySelectorAll('.student-checkbox, .mobile-student-checkbox').forEach(checkbox => {
-                    checkbox.checked = isChecked;
-                });
-                
-                updateBulkSendButtons();
-            }
-
-            // Update select all checkboxes state
-            function updateSelectAllCheckboxes() {
-                const allChecked = filteredData.length > 0 && 
-                                 filteredData.every((_, index) => selectedStudents.has(index));
-                
-                selectAll.checked = allChecked;
-                selectAllHeader.checked = allChecked;
-                mobileSelectAll.checked = allChecked;
-            }
-
-            // Update bulk send buttons state
-            function updateBulkSendButtons() {
-                const hasSelected = selectedStudents.size > 0;
-                
-                bulkSendBtn.disabled = !hasSelected;
-                mobileBulkSendBtn.disabled = !hasSelected;
-                
-                if (hasSelected) {
-                    bulkSendBtn.innerHTML = `<i class="fas fa-paper-plane mr-2"></i> Kirim (${selectedStudents.size})`;
-                    mobileBulkSendBtn.innerHTML = `<i class="fas fa-paper-plane mr-2"></i> Kirim (${selectedStudents.size})`;
-                } else {
-                    bulkSendBtn.innerHTML = `<i class="fas fa-paper-plane mr-2"></i> Kirim Massal`;
-                    mobileBulkSendBtn.innerHTML = `<i class="fas fa-paper-plane mr-2"></i> Kirim`;
-                }
-            }
-
-            // Send message to a single recipient
-            function sendMessage(btn) {
-                const template = document.getElementById('message-template').value;
-                if (!template) {
-                    showToast('Harap isi template pesan terlebih dahulu', 'error');
-                    // On mobile, switch to template tab if empty
-                    if (window.innerWidth < 640) {
-                        templateTabBtn.click();
-                        document.getElementById('message-template').focus();
-                    }
-                    return;
-                }
-
-                const index = parseInt(btn.dataset.index);
-                const phone = btn.dataset.phone;
-                const studentData = filteredData[index];
-
-                const finalMessage = replaceTemplateVariables(template, studentData);
-                const encodedMessage = encodeURIComponent(finalMessage);
-                const waUrl = `https://wa.me/${phone}?text=${encodedMessage}`;
-                
-                window.open(waUrl, '_blank');
-                showToast('Pesan siap dikirim di WhatsApp', 'success');
-            }
-
-            // Send message from preview modal
-            function sendFromPreviewHandler() {
-                if (currentPreviewIndex === null || currentPreviewPhone === null) return;
-                
-                const studentData = filteredData[currentPreviewIndex];
-                const finalMessage = replaceTemplateVariables(
-                    document.getElementById('message-template').value, 
-                    studentData
-                );
-                
-                const encodedMessage = encodeURIComponent(finalMessage);
-                const waUrl = `https://wa.me/${currentPreviewPhone}?text=${encodedMessage}`;
-                
-                window.open(waUrl, '_blank');
-                previewModal.classList.add('hidden');
-                showToast('Pesan siap dikirim di WhatsApp', 'success');
-            }
-
-            // Send bulk messages to selected recipients
-            function sendBulkMessages() {
-                const template = document.getElementById('message-template').value;
-                if (!template) {
-                    showToast('Harap isi template pesan terlebih dahulu', 'error');
-                    // On mobile, switch to template tab if empty
-                    if (window.innerWidth < 640) {
-                        templateTabBtn.click();
-                        document.getElementById('message-template').focus();
-                    }
-                    return;
-                }
-
-                // Ask for confirmation
-                if (!confirm(`Anda akan mengirim pesan ke ${selectedStudents.size} penerima. Lanjutkan?`)) {
-                    return;
-                }
-
-                // Open WhatsApp for each selected student
-                selectedStudents.forEach(index => {
-                    const studentData = filteredData[index];
-                    
-                    // Try to send to student first, then parents
-                    if (studentData.WA_Siswa) {
-                        const finalMessage = replaceTemplateVariables(template, studentData);
-                        const encodedMessage = encodeURIComponent(finalMessage);
-                        const waUrl = `https://wa.me/${studentData.WA_Siswa}?text=${encodedMessage}`;
-                        window.open(waUrl, '_blank');
-                    } else if (studentData.WA_Ayah) {
-                        const finalMessage = replaceTemplateVariables(template, studentData);
-                        const encodedMessage = encodeURIComponent(finalMessage);
-                        const waUrl = `https://wa.me/${studentData.WA_Ayah}?text=${encodedMessage}`;
-                        window.open(waUrl, '_blank');
-                    } else if (studentData.WA_Ibu) {
-                        const finalMessage = replaceTemplateVariables(template, studentData);
-                        const encodedMessage = encodeURIComponent(finalMessage);
-                        const waUrl = `https://wa.me/${studentData.WA_Ibu}?text=${encodedMessage}`;
-                        window.open(waUrl, '_blank');
-                    }
-                });
-
-                showToast(`Membuka WhatsApp untuk ${selectedStudents.size} penerima`, 'success');
-            }
-
-            // Replace template variables with actual data
-            function replaceTemplateVariables(template, studentData) {
-                let finalMessage = template;
-                for (const key in studentData) {
-                    if (studentData[key] === null || studentData[key] === undefined) {
-                        finalMessage = finalMessage.replace(new RegExp(`\\[\\[${key}\\]\\]`, 'g'), '-');
-                    } else {
-                        finalMessage = finalMessage.replace(new RegExp(`\\[\\[${key}\\]\\]`, 'g'), studentData[key]);
-                    }
-                }
-                return finalMessage;
-            }
-
-            // Show preview of the message
-            function showPreview() {
-                const template = document.getElementById('message-template').value;
-                if (!template) {
-                    showToast('Harap isi template pesan terlebih dahulu', 'error');
-                    return;
-                }
-
-                // Find the first student with WhatsApp number
-                const previewStudent = filteredData.find(student => 
-                    student.WA_Siswa || student.WA_Ayah || student.WA_Ibu
-                );
-
-                if (!previewStudent) {
-                    showToast('Tidak ada penerima yang valid untuk pratinjau', 'error');
-                    return;
-                }
-
-                currentPreviewIndex = filteredData.indexOf(previewStudent);
-                currentPreviewPhone = previewStudent.WA_Siswa || previewStudent.WA_Ayah || previewStudent.WA_Ibu;
-
-                const finalMessage = replaceTemplateVariables(template, previewStudent);
-                previewContent.textContent = finalMessage;
-                previewModal.classList.remove('hidden');
-            }
-
-            // Save template to localStorage
-            function saveTemplate() {
-                const template = document.getElementById('message-template').value;
-                localStorage.setItem('whatsappTemplate', template);
-                showToast('Template berhasil disimpan', 'success');
-            }
-
-            // Load template from localStorage
-            function loadTemplate() {
-                const savedTemplate = localStorage.getItem('whatsappTemplate');
-                if (savedTemplate) {
-                    document.getElementById('message-template').value = savedTemplate;
-                }
-            }
-
-            // Show toast notification
-            function showToast(message, type = 'success') {
-                const toastIcon = document.getElementById('toast-icon');
-                const toastMessage = document.getElementById('toast-message');
-                
-                // Set icon and color based on type
-                if (type === 'success') {
-                    toastIcon.className = 'fas fa-check-circle mr-3 text-xl text-green-500';
-                    toast.style.borderLeftColor = 'green';
-                } else {
-                    toastIcon.className = 'fas fa-exclamation-circle mr-3 text-xl text-red-500';
-                    toast.style.borderLeftColor = 'red';
-                }
-                
-                toastMessage.textContent = message;
-                toast.classList.remove('hidden');
-                
-                // Hide after 3 seconds
-                setTimeout(() => {
-                    toast.classList.add('hidden');
-                }, 3000);
-            }
-
-            // Initialize
             loadTemplate();
-
-            // Set up mobile tab switching
-            setupMobileTabs();
+            setupEventListeners();
         });
 
-        // Set up mobile tab navigation
-        function setupMobileTabs() {
-            if (window.innerWidth >= 640) return; // Only for mobile
+        function setupEventListeners() {
+            dom.searchInput.addEventListener('input', filterAndRender);
+            dom.templateTabBtn.addEventListener('click', () => switchTab('template'));
+            dom.recipientTabBtn.addEventListener('click', () => switchTab('recipient'));
+            dom.selectAllHeader.addEventListener('change', (e) => toggleSelectAll(e.target.checked));
+            dom.selectAllFooter.addEventListener('change', (e) => toggleSelectAll(e.target.checked));
+            dom.bulkSendBtn.addEventListener('click', sendBulkMessages);
+            dom.mobileBulkSendBtn.addEventListener('click', sendBulkMessages);
+            document.getElementById('save-template-btn').addEventListener('click', saveTemplate);
+            document.getElementById('preview-btn').addEventListener('click', showPreview);
+            document.getElementById('close-preview-btn').addEventListener('click', () => dom.previewModal.classList.add('hidden'));
+            document.getElementById('close-preview-btn-2').addEventListener('click', () => dom.previewModal.classList.add('hidden'));
             
-            // Hide template section by default on mobile
-            document.getElementById('template-section').classList.add('hidden');
-            document.getElementById('recipient-section').classList.remove('hidden');
-            
-            // Set up template tab content
-            document.getElementById('template-tab-btn').addEventListener('click', function() {
-                const templateContent = document.getElementById('template-section').innerHTML;
-                document.getElementById('mobile-tab-content').innerHTML = templateContent;
-                document.getElementById('mobile-tab-container').style.display = 'block';
-                
-                // Re-attach event listeners for elements inside the tab
-                document.getElementById('preview-btn').addEventListener('click', showPreview);
-                document.getElementById('save-template-btn').addEventListener('click', saveTemplate);
+            dom.dataTableBody.addEventListener('click', e => {
+                if (e.target.closest('.send-btn')) sendMessage(e.target.closest('.send-btn'));
+            });
+
+            dom.dataTableBody.addEventListener('change', e => {
+                if (e.target.classList.contains('student-checkbox')) {
+                    const index = parseInt(e.target.dataset.index, 10);
+                    e.target.checked ? selectedIndices.add(index) : selectedIndices.delete(index);
+                    updateUI();
+                }
             });
         }
+        
+        function switchTab(tabName) {
+            const isTemplate = tabName === 'template';
+            dom.templateSection.classList.toggle('hidden', !isTemplate);
+            dom.recipientSection.classList.toggle('hidden', isTemplate);
+            dom.templateTabBtn.classList.toggle('bg-blue-600', isTemplate);
+            dom.templateTabBtn.classList.toggle('text-white', isTemplate);
+            dom.recipientTabBtn.classList.toggle('bg-blue-600', !isTemplate);
+            dom.recipientTabBtn.classList.toggle('text-white', !isTemplate);
+        }
 
-        // Handle window resize
-        window.addEventListener('resize', function() {
-            if (window.innerWidth >= 640) {
-                // On desktop, ensure both sections are visible
-                document.getElementById('template-section').classList.remove('hidden');
-                document.getElementById('recipient-section').classList.remove('hidden');
-                document.getElementById('mobile-tab-container').style.display = 'none';
+        async function loadData() {
+            try {
+                const response = await fetch(webAppUrl);
+                if (!response.ok) throw new Error('Network response was not ok');
+                fetchedData = await response.json();
+                dom.statusMessage.classList.add('hidden');
+                dom.dataContainer.classList.remove('hidden');
+                filterAndRender();
+            } catch (error) {
+                dom.statusMessage.innerHTML = 'Gagal memuat data. Periksa URL atau koneksi.';
             }
-        });
+        }
+
+        function filterAndRender() {
+            const term = dom.searchInput.value.toLowerCase();
+            filteredData = fetchedData.filter(item => 
+                item.Nama_Siswa?.toLowerCase().includes(term) || item.NIS?.toString().includes(term)
+            );
+            renderTable();
+            updateUI();
+        }
+
+        function renderTable() {
+            dom.emptyState.classList.toggle('hidden', filteredData.length > 0);
+            dom.dataTableBody.innerHTML = filteredData.map(item => {
+                const originalIndex = fetchedData.indexOf(item);
+                const isSelected = selectedIndices.has(originalIndex);
+                let actionsHTML = '<div class="action-buttons">';
+                if(item.WA_Siswa) actionsHTML += `<button class="send-btn flex-1 px-3 py-2 text-xs font-semibold bg-green-100 text-green-700 rounded-md" data-phone="${item.WA_Siswa}"><i class="fab fa-whatsapp mr-1"></i>Siswa</button>`;
+                if(item.WA_Ayah) actionsHTML += `<button class="send-btn flex-1 px-3 py-2 text-xs font-semibold bg-blue-100 text-blue-700 rounded-md" data-phone="${item.WA_Ayah}"><i class="fab fa-whatsapp mr-1"></i>Ayah</button>`;
+                if(item.WA_Ibu) actionsHTML += `<button class="send-btn flex-1 px-3 py-2 text-xs font-semibold bg-purple-100 text-purple-700 rounded-md" data-phone="${item.WA_Ibu}"><i class="fab fa-whatsapp mr-1"></i>Ibu</button>`;
+                actionsHTML += '</div>';
+
+                return `
+                    <tr class="${isSelected ? 'bg-blue-50' : ''}">
+                        <td data-label="Pilih" class="p-4"><input type="checkbox" class="student-checkbox h-4 w-4" data-index="${originalIndex}" ${isSelected ? 'checked' : ''}></td>
+                        <td data-label="Siswa" class="p-4"><div class="font-bold text-gray-800">${item.Nama_Siswa}</div><div class="text-xs text-gray-500">NIS: ${item.NIS}</div></td>
+                        <td data-label="Aksi" class="p-4">${actionsHTML}</td>
+                    </tr>`;
+            }).join('');
+        }
+        
+        function updateUI() {
+            const allVisibleSelected = filteredData.length > 0 && filteredData.every(item => selectedIndices.has(fetchedData.indexOf(item)));
+            dom.selectAllHeader.checked = allVisibleSelected;
+            dom.selectAllFooter.checked = allVisibleSelected;
+            
+            const canSend = selectedIndices.size > 0;
+            [dom.bulkSendBtn, dom.mobileBulkSendBtn].forEach(btn => {
+                btn.disabled = !canSend;
+                const baseText = btn.id === 'bulk-send-btn' ? 'Kirim Massal' : 'Kirim';
+                btn.innerHTML = canSend ? `<i class="fas fa-paper-plane mr-2"></i>${baseText} (${selectedIndices.size})` : `<i class="fas fa-paper-plane mr-2"></i>${baseText}`;
+            });
+        }
+        
+        function toggleSelectAll(isChecked) {
+            filteredData.forEach(item => {
+                const originalIndex = fetchedData.indexOf(item);
+                isChecked ? selectedIndices.add(originalIndex) : selectedIndices.delete(originalIndex);
+            });
+            renderTable();
+            updateUI();
+        }
+
+        function sendMessage(btn) {
+            const template = dom.messageTemplate.value;
+            if (!template) return showToast('Template pesan tidak boleh kosong.', 'error');
+            const phone = btn.dataset.phone;
+            const tr = btn.closest('tr');
+            const studentIndex = parseInt(tr.querySelector('.student-checkbox').dataset.index, 10);
+            const studentData = fetchedData[studentIndex];
+            const finalMessage = replaceTemplateVariables(template, studentData);
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(finalMessage)}`, '_blank');
+        }
+
+        function sendBulkMessages() {
+            const template = dom.messageTemplate.value;
+            if (!template) return showToast('Template pesan tidak boleh kosong.', 'error');
+            if (confirm(`Anda akan membuka WhatsApp untuk ${selectedIndices.size} penerima. Lanjutkan?`)) {
+                selectedIndices.forEach(index => {
+                    const studentData = fetchedData[index];
+                    const phone = studentData.WA_Siswa || studentData.WA_Ayah || studentData.WA_Ibu;
+                    if (phone) {
+                        const finalMessage = replaceTemplateVariables(template, studentData);
+                        window.open(`https://wa.me/${phone}?text=${encodeURIComponent(finalMessage)}`, '_blank');
+                    }
+                });
+            }
+        }
+        
+        function replaceTemplateVariables(template, data) {
+            return template.replace(/\[\[(.*?)\]\]/g, (match, key) => data[key.trim()] || '-');
+        }
+
+        function saveTemplate() {
+            localStorage.setItem('whatsappTemplate', dom.messageTemplate.value);
+            showToast('Template berhasil disimpan.', 'success');
+        }
+
+        function loadTemplate() {
+            dom.messageTemplate.value = localStorage.getItem('whatsappTemplate') || '';
+        }
+
+        function showPreview() {
+            const template = dom.messageTemplate.value;
+            if (!template) return showToast('Isi template untuk melihat pratinjau.', 'error');
+            const studentData = fetchedData[0] || {Nama_Siswa: 'John Doe', NIS: '12345'};
+            dom.previewContent.textContent = replaceTemplateVariables(template, studentData);
+            dom.previewModal.classList.remove('hidden');
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastIcon = document.getElementById('toast-icon');
+            const toastMessage = document.getElementById('toast-message');
+            toast.style.borderLeftColor = type === 'success' ? '#22c55e' : '#ef4444';
+            toastIcon.className = type === 'success' ? 'fas fa-check-circle text-green-500' : 'fas fa-exclamation-circle text-red-500';
+            toastMessage.textContent = message;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 3000);
+        }
     </script>
 </body>
 </html>
