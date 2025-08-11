@@ -4,451 +4,304 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kirim Pesan WhatsApp</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- Custom Styles -->
     <style>
-        :root {
-            --primary: #25D366;
-            --primary-dark: #128C7E;
-            --secondary: #3498db;
-            --secondary-dark: #2980b9;
-            --light-gray: #f4f4f4;
-            --medium-gray: #ecf0f1;
-            --dark-gray: #2c3e50;
-            --text: #333;
-            --text-light: #7f8c8d;
-            --white: #ffffff;
-            --border: #bdc3c7;
-            --error: #e74c3c;
-            --success: #2ecc71;
+        /* Custom animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+        .animate-fade-in-up {
+            animation: fadeInUp 0.5s ease-out forwards;
         }
         
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            line-height: 1.6;
-            background-color: var(--light-gray);
-            color: var(--text);
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
         }
         
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background-color: var(--white);
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
-            margin-top: 20px;
-            margin-bottom: 20px;
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
         }
         
-        h1, h2 {
-            color: var(--dark-gray);
-            margin-bottom: 1rem;
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
         }
         
-        h1 {
-            text-align: center;
-            font-size: 1.8rem;
-            padding-bottom: 15px;
-            border-bottom: 2px solid var(--medium-gray);
-            margin-bottom: 25px;
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
         }
         
-        h2 {
-            font-size: 1.4rem;
-            text-align: left;
-        }
-        
-        /* Template Message Box */
-        .template-box {
-            background-color: var(--medium-gray);
-            border: 1px solid var(--border);
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 30px;
-            position: relative;
-        }
-        
-        .template-box h2 {
-            margin-top: 0;
-            display: flex;
-            align-items: center;
-        }
-        
-        .template-box h2 i {
-            margin-right: 10px;
-            color: var(--secondary);
-        }
-        
-        #message-template {
-            width: 100%;
-            padding: 15px;
-            border-radius: 6px;
-            border: 1px solid var(--border);
-            font-size: 1em;
-            min-height: 150px;
-            resize: vertical;
-            font-family: inherit;
-            transition: border 0.3s ease;
-        }
-        
-        #message-template:focus {
-            outline: none;
-            border-color: var(--secondary);
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
-        }
-        
-        .variables {
-            margin-top: 15px;
-            font-size: 0.9em;
-            color: var(--text-light);
-            background-color: rgba(255,255,255,0.7);
-            padding: 10px;
+        /* Custom checkbox */
+        .custom-checkbox {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #e2e8f0;
             border-radius: 4px;
-        }
-        
-        .variables strong {
-            color: var(--dark-gray);
-        }
-        
-        /* Table Styles */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        
-        table.hidden {
-            display: none;
-        }
-        
-        th, td {
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            text-align: left;
-            vertical-align: middle;
-        }
-        
-        thead tr {
-            background-color: var(--secondary);
-            color: var(--white);
-        }
-        
-        tbody tr:nth-child(even) {
-            background-color: var(--light-gray);
-        }
-        
-        tbody tr:hover {
-            background-color: rgba(52, 152, 219, 0.1);
-        }
-        
-        /* Status Message */
-        #status-message {
-            text-align: center;
-            padding: 20px;
-            font-size: 1.1em;
-            color: var(--text-light);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100px;
-        }
-        
-        .loading-spinner {
-            border: 4px solid rgba(0,0,0,0.1);
-            border-radius: 50%;
-            border-top: 4px solid var(--secondary);
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin-bottom: 15px;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .error {
-            color: var(--error);
-            font-weight: bold;
-        }
-        
-        .success {
-            color: var(--success);
-        }
-        
-        /* Buttons */
-        .btn-container {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        
-        .send-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            margin: 2px;
-            padding: 8px 15px;
-            color: white;
-            text-decoration: none;
-            border-radius: 6px;
-            font-size: 0.9em;
-            border: none;
             cursor: pointer;
-            transition: all 0.3s ease;
-            min-width: 80px;
-        }
-        
-        .send-btn i {
-            margin-right: 5px;
-            font-size: 0.9em;
-        }
-        
-        .send-btn.student { 
-            background-color: var(--primary); 
-        }
-        .send-btn.student:hover { 
-            background-color: var(--primary-dark); 
-            transform: translateY(-2px);
-        }
-        
-        .send-btn.parent { 
-            background-color: var(--secondary); 
-        }
-        .send-btn.parent:hover { 
-            background-color: var(--secondary-dark); 
-            transform: translateY(-2px);
-        }
-        
-        /* Filter/Search */
-        .search-container {
-            margin-bottom: 20px;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        
-        .search-box {
-            flex: 1;
-            min-width: 200px;
-            padding: 10px 15px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            font-size: 1em;
-            transition: all 0.3s ease;
-        }
-        
-        .search-box:focus {
-            outline: none;
-            border-color: var(--secondary);
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
-        }
-        
-        .filter-btn {
-            background-color: var(--white);
-            border: 1px solid var(--border);
-            padding: 10px 15px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .filter-btn:hover {
-            background-color: var(--light-gray);
-        }
-        
-        .filter-btn.active {
-            background-color: var(--secondary);
-            color: var(--white);
-            border-color: var(--secondary);
-        }
-        
-        /* Responsive Table */
-        @media (max-width: 768px) {
-            .container {
-                padding: 15px;
-                margin: 10px;
-            }
-            
-            table {
-                display: block;
-                overflow-x: auto;
-                white-space: nowrap;
-            }
-            
-            th, td {
-                padding: 8px 10px;
-            }
-            
-            .send-btn {
-                padding: 6px 10px;
-                min-width: auto;
-            }
-            
-            .btn-container {
-                flex-direction: column;
-                gap: 5px;
-            }
-            
-            .search-container {
-                flex-direction: column;
-                gap: 8px;
-            }
-            
-            .search-box {
-                width: 100%;
-            }
-        }
-        
-        /* Floating Action Button */
-        .fab {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 60px;
-            height: 60px;
-            background-color: var(--primary);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            cursor: pointer;
-            z-index: 100;
-            transition: all 0.3s ease;
-            border: none;
-        }
-        
-        .fab:hover {
-            background-color: var(--primary-dark);
-            transform: translateY(-3px) scale(1.05);
-        }
-        
-        /* Tooltip */
-        .tooltip {
             position: relative;
-            display: inline-block;
+            transition: all 0.2s;
         }
         
-        .tooltip .tooltiptext {
-            visibility: hidden;
-            width: 200px;
-            background-color: var(--dark-gray);
-            color: var(--white);
-            text-align: center;
-            border-radius: 6px;
-            padding: 8px;
+        .custom-checkbox:checked {
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+        }
+        
+        .custom-checkbox:checked::after {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
             position: absolute;
-            z-index: 1;
-            bottom: 125%;
+            color: white;
+            font-size: 12px;
+            top: 50%;
             left: 50%;
-            transform: translateX(-50%);
-            opacity: 0;
-            transition: opacity 0.3s;
-            font-size: 0.8em;
-            font-weight: normal;
+            transform: translate(-50%, -50%);
         }
         
-        .tooltip:hover .tooltiptext {
-            visibility: visible;
-            opacity: 1;
+        /* Pulse animation for buttons */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
         
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-light);
-        }
-        
-        .empty-state i {
-            font-size: 3em;
-            margin-bottom: 15px;
-            color: var(--border);
+        .animate-pulse {
+            animation: pulse 2s infinite;
         }
     </style>
 </head>
-<body>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed top-5 right-5 z-50 hidden">
+        <div class="flex items-center p-4 rounded-lg shadow-lg bg-white border-l-4">
+            <i id="toast-icon" class="fas fa-check-circle mr-3 text-xl"></i>
+            <span id="toast-message">Pesan berhasil dikirim!</span>
+        </div>
+    </div>
 
-    <div class="container">
-        <h1><i class="fas fa-comment-dots"></i> Kirim Notifikasi WhatsApp</h1>
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header -->
+        <header class="mb-10 text-center animate__animated animate__fadeIn">
+            <div class="inline-block p-4 rounded-full bg-blue-50 mb-4">
+                <i class="fas fa-comments text-4xl text-blue-500"></i>
+            </div>
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2">Kirim Notifikasi WhatsApp</h1>
+            <p class="text-gray-600 max-w-2xl mx-auto">Kirim pesan personal ke siswa dan orang tua dengan template yang dapat disesuaikan</p>
+        </header>
 
-        <div class="template-box">
-            <h2><i class="fas fa-edit"></i> 1. Buat Template Pesan</h2>
-            <p>Gunakan variabel dinamis. Variabel akan otomatis diganti sesuai data di setiap baris.</p>
-            <textarea id="message-template" rows="6" placeholder="Contoh: 
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Template Section -->
+            <div class="lg:col-span-1 bg-white rounded-xl shadow-md overflow-hidden animate__animated animate__fadeInLeft">
+                <div class="p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-blue-100 p-2 rounded-lg mr-3">
+                            <i class="fas fa-edit text-blue-500"></i>
+                        </div>
+                        <h2 class="text-xl font-semibold text-gray-800">Template Pesan</h2>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Variabel Tersedia:</label>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="bg-gray-100 px-3 py-1 rounded-full text-xs text-gray-700">[[No]]</span>
+                            <span class="bg-gray-100 px-3 py-1 rounded-full text-xs text-gray-700">[[NIS]]</span>
+                            <span class="bg-gray-100 px-3 py-1 rounded-full text-xs text-gray-700">[[Nama_Siswa]]</span>
+                            <span class="bg-gray-100 px-3 py-1 rounded-full text-xs text-gray-700">[[WA_Siswa]]</span>
+                            <span class="bg-gray-100 px-3 py-1 rounded-full text-xs text-gray-700">[[WA_Ayah]]</span>
+                            <span class="bg-gray-100 px-3 py-1 rounded-full text-xs text-gray-700">[[WA_Ibu]]</span>
+                            <span class="bg-gray-100 px-3 py-1 rounded-full text-xs text-gray-700">[[id_file_google]]</span>
+                        </div>
+                    </div>
+                    
+                    <textarea id="message-template" rows="10" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200" placeholder="Contoh: 
 Assalamualaikum Bapak/Ibu wali dari [[Nama_Siswa]], 
 
 Kami ingin menginformasikan bahwa... 
 
 Terima kasih."></textarea>
-            <div class="variables">
-                <strong>Variabel Tersedia:</strong> [[No]], [[NIS]], [[Nama_Siswa]], [[WA_Siswa]], [[WA_Ayah]], [[WA_Ibu]], [[id_file_google]]
+                    
+                    <div class="mt-4 flex justify-between items-center">
+                        <button id="preview-btn" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition flex items-center">
+                            <i class="fas fa-eye mr-2"></i> Preview
+                        </button>
+                        <button id="save-template-btn" class="px-4 py-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition flex items-center">
+                            <i class="fas fa-save mr-2"></i> Simpan Template
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Section -->
+            <div class="lg:col-span-2 animate__animated animate__fadeInRight">
+                <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                    <div class="p-6 border-b border-gray-200">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+                            <div class="flex items-center mb-4 md:mb-0">
+                                <div class="bg-green-100 p-2 rounded-lg mr-3">
+                                    <i class="fas fa-users text-green-500"></i>
+                                </div>
+                                <h2 class="text-xl font-semibold text-gray-800">Daftar Penerima</h2>
+                            </div>
+                            
+                            <div class="flex flex-col sm:flex-row gap-3">
+                                <div class="relative flex-grow">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class="fas fa-search text-gray-400"></i>
+                                    </div>
+                                    <input type="text" id="searchInput" class="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200" placeholder="Cari siswa...">
+                                </div>
+                                <select id="filterSelect" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
+                                    <option value="all">Semua</option>
+                                    <option value="student">Siswa</option>
+                                    <option value="parent">Orang Tua</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <input type="checkbox" id="selectAll" class="custom-checkbox mr-2">
+                                <label for="selectAll" class="text-sm text-gray-600">Pilih Semua</label>
+                            </div>
+                            <button id="bulk-send-btn" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition flex items-center disabled:opacity-50" disabled>
+                                <i class="fas fa-paper-plane mr-2"></i> Kirim Massal
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="status-message" class="p-8 text-center">
+                        <div class="inline-block animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500 mb-4"></div>
+                        <p class="text-gray-600">Memuat data siswa, mohon tunggu...</p>
+                    </div>
+                    
+                    <div id="data-container" class="hidden overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <input type="checkbox" id="selectAllHeader" class="custom-checkbox">
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Siswa</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NIS</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dataTable" class="bg-white divide-y divide-gray-200">
+                                <!-- Data will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div id="emptyState" class="hidden p-10 text-center">
+                        <i class="fas fa-user-graduate text-5xl text-gray-300 mb-4"></i>
+                        <h3 class="text-lg font-medium text-gray-700 mb-2">Tidak ada data yang cocok</h3>
+                        <p class="text-gray-500">Coba gunakan kata kunci pencarian yang berbeda</p>
+                    </div>
+                    
+                    <div id="pagination" class="hidden px-6 py-4 flex items-center justify-between border-t border-gray-200">
+                        <div class="flex-1 flex justify-between sm:hidden">
+                            <button class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                Sebelumnya
+                            </button>
+                            <button class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                Selanjutnya
+                            </button>
+                        </div>
+                        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                            <div>
+                                <p class="text-sm text-gray-700">
+                                    Menampilkan <span class="font-medium">1</span> sampai <span class="font-medium">10</span> dari <span class="font-medium">20</span> hasil
+                                </p>
+                            </div>
+                            <div>
+                                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                                    <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                        <span class="sr-only">Previous</span>
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                    <a href="#" aria-current="page" class="z-10 bg-blue-50 border-blue-500 text-blue-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                                        1
+                                    </a>
+                                    <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                                        2
+                                    </a>
+                                    <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                                        3
+                                    </a>
+                                    <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                        <span class="sr-only">Next</span>
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+    </div>
 
-        <h2><i class="fas fa-users"></i> 2. Pilih Penerima dan Kirim</h2>
-        
-        <div class="search-container">
-            <input type="text" id="searchInput" class="search-box" placeholder="Cari nama siswa atau NIS..." onkeyup="filterTable()">
-            <button class="filter-btn active" onclick="filterTable('all')">Semua</button>
-            <button class="filter-btn" onclick="filterTable('student')">Siswa</button>
-            <button class="filter-btn" onclick="filterTable('parent')">Orang Tua</button>
-        </div>
-        
-        <div id="status-message">
-            <div class="loading-spinner"></div>
-            <div>Memuat data siswa, mohon tunggu...</div>
-        </div>
-
-        <table id="dataTable" class="hidden">
-            <thead>
-                <tr>
-                    <th>No.</th>
-                    <th>NIS</th>
-                    <th>Nama Siswa</th>
-                    <th>Kirim Pesan</th>
-                </tr>
-            </thead>
-            <tbody id="data-container">
-                <!-- Data akan dimuat di sini -->
-            </tbody>
-        </table>
-        
-        <div id="emptyState" class="empty-state hidden">
-            <i class="fas fa-user-graduate"></i>
-            <h3>Tidak ada data yang cocok</h3>
-            <p>Coba gunakan kata kunci pencarian yang berbeda</p>
+    <!-- Preview Modal -->
+    <div id="preview-modal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
+                            <i class="fas fa-eye text-blue-600"></i>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Pratinjau Pesan</h3>
+                            <div class="mt-4">
+                                <div class="border border-gray-200 rounded-lg p-4 bg-gray-50 max-h-96 overflow-y-auto">
+                                    <pre id="preview-content" class="whitespace-pre-wrap font-sans"></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="button" id="send-from-preview" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm">
+                        <i class="fas fa-paper-plane mr-2"></i> Kirim Pesan
+                    </button>
+                    <button type="button" id="close-preview" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        Tutup
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
-    
-    <button class="fab tooltip" onclick="scrollToTop()" title="Kembali ke atas">
-        <i class="fas fa-arrow-up"></i>
-        <span class="tooltiptext">Kembali ke atas</span>
-    </button>
 
     <script>
         // ===================================================================
         const webAppUrl = 'https://script.google.com/macros/s/AKfycbz3nCIRHCMaUQy6LJcF6eZoD8TiQmJIVFsAygGRgHyxGwnDrKsOb5z_6Y96N0XHgyCNxw/exec';
         // ===================================================================
 
-        // Deklarasikan variabel data di luar fungsi agar bisa diakses oleh event listener
+        // Global variables
         let fetchedData = [];
         let filteredData = [];
+        let selectedStudents = new Set();
+        let currentPreviewIndex = null;
+        let currentPreviewPhone = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             const dataContainer = document.getElementById('data-container');
@@ -456,7 +309,33 @@ Terima kasih."></textarea>
             const dataTable = document.getElementById('dataTable');
             const emptyState = document.getElementById('emptyState');
             const searchInput = document.getElementById('searchInput');
+            const filterSelect = document.getElementById('filterSelect');
+            const selectAll = document.getElementById('selectAll');
+            const selectAllHeader = document.getElementById('selectAllHeader');
+            const bulkSendBtn = document.getElementById('bulk-send-btn');
+            const previewBtn = document.getElementById('preview-btn');
+            const saveTemplateBtn = document.getElementById('save-template-btn');
+            const previewModal = document.getElementById('preview-modal');
+            const closePreview = document.getElementById('close-preview');
+            const sendFromPreview = document.getElementById('send-from-preview');
+            const previewContent = document.getElementById('preview-content');
+            const toast = document.getElementById('toast');
 
+            // Initialize the app
+            loadData();
+
+            // Event listeners
+            searchInput.addEventListener('input', () => filterTable());
+            filterSelect.addEventListener('change', () => filterTable());
+            selectAll.addEventListener('change', toggleSelectAll);
+            selectAllHeader.addEventListener('change', toggleSelectAll);
+            bulkSendBtn.addEventListener('click', sendBulkMessages);
+            previewBtn.addEventListener('click', showPreview);
+            saveTemplateBtn.addEventListener('click', saveTemplate);
+            closePreview.addEventListener('click', () => previewModal.classList.add('hidden'));
+            sendFromPreview.addEventListener('click', sendFromPreviewHandler);
+
+            // Load data from server
             async function loadData() {
                 try {
                     const response = await fetch(webAppUrl);
@@ -466,88 +345,265 @@ Terima kasih."></textarea>
                     filteredData = [...fetchedData];
                     
                     if (fetchedData.length === 0) {
-                        statusMessage.innerHTML = '<i class="fas fa-exclamation-circle"></i><div>Tidak ada data untuk ditampilkan.</div>';
+                        showEmptyState();
                         return;
                     }
 
-                    dataTable.classList.remove('hidden');
-                    statusMessage.style.display = 'none';
-                    renderTable(fetchedData);
+                    renderTable();
+                    statusMessage.classList.add('hidden');
+                    dataContainer.classList.remove('hidden');
 
                 } catch (error) {
                     console.error('Gagal mengambil data:', error);
-                    statusMessage.innerHTML = '<i class="fas fa-exclamation-triangle"></i><div class="error">Gagal memuat data. Periksa URL atau koneksi internet.</div>';
+                    statusMessage.innerHTML = `
+                        <i class="fas fa-exclamation-triangle text-red-500 text-3xl mb-3"></i>
+                        <p class="text-red-500 font-medium">Gagal memuat data. Periksa URL atau koneksi internet.</p>
+                    `;
                 }
             }
 
-            function renderTable(data) {
-                dataContainer.innerHTML = '';
-                
-                if (data.length === 0) {
-                    dataTable.classList.add('hidden');
-                    emptyState.classList.remove('hidden');
+            // Render table with current filtered data
+            function renderTable() {
+                if (filteredData.length === 0) {
+                    showEmptyState();
                     return;
                 }
                 
                 emptyState.classList.add('hidden');
-                dataTable.classList.remove('hidden');
+                dataContainer.classList.remove('hidden');
                 
-                data.forEach((item, index) => {
-                    const row = document.createElement('tr');
+                let tableHTML = '';
+                
+                filteredData.forEach((item, index) => {
+                    const isSelected = selectedStudents.has(index);
                     
-                    // Membuat tombol kirim secara dinamis
-                    let actionsHtml = '<div class="btn-container">';
+                    // Prepare action buttons
+                    let actionsHTML = '<div class="flex flex-col sm:flex-row gap-2">';
+                    
                     if (item.WA_Siswa) {
-                        actionsHtml += `<button class="send-btn student" data-index="${index}" data-phone="${item.WA_Siswa}" title="Kirim ke siswa">
-                            <i class="fas fa-user-graduate"></i> Siswa
-                        </button>`;
+                        actionsHTML += `
+                            <button class="student-btn px-3 py-1 bg-green-100 text-green-700 rounded-md text-sm hover:bg-green-200 transition flex items-center justify-center" 
+                                data-index="${index}" data-phone="${item.WA_Siswa}">
+                                <i class="fas fa-user-graduate mr-1"></i> Siswa
+                            </button>`;
                     }
+                    
                     if (item.WA_Ayah) {
-                        actionsHtml += `<button class="send-btn parent" data-index="${index}" data-phone="${item.WA_Ayah}" title="Kirim ke ayah">
-                            <i class="fas fa-male"></i> Ayah
-                        </button>`;
+                        actionsHTML += `
+                            <button class="parent-btn px-3 py-1 bg-blue-100 text-blue-700 rounded-md text-sm hover:bg-blue-200 transition flex items-center justify-center" 
+                                data-index="${index}" data-phone="${item.WA_Ayah}">
+                                <i class="fas fa-male mr-1"></i> Ayah
+                            </button>`;
                     }
+                    
                     if (item.WA_Ibu) {
-                        actionsHtml += `<button class="send-btn parent" data-index="${index}" data-phone="${item.WA_Ibu}" title="Kirim ke ibu">
-                            <i class="fas fa-female"></i> Ibu
-                        </button>`;
+                        actionsHTML += `
+                            <button class="parent-btn px-3 py-1 bg-purple-100 text-purple-700 rounded-md text-sm hover:bg-purple-200 transition flex items-center justify-center" 
+                                data-index="${index}" data-phone="${item.WA_Ibu}">
+                                <i class="fas fa-female mr-1"></i> Ibu
+                            </button>`;
                     }
-                    actionsHtml += '</div>';
-
-                    row.innerHTML = `
-                        <td>${item.No}</td>
-                        <td>${item.NIS || '-'}</td>
-                        <td>${item.Nama_Siswa}</td>
-                        <td>${actionsHtml || '-'}</td>
+                    
+                    actionsHTML += '</div>';
+                    
+                    tableHTML += `
+                        <tr class="${isSelected ? 'bg-blue-50' : ''}">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <input type="checkbox" class="custom-checkbox student-checkbox" 
+                                    data-index="${index}" ${isSelected ? 'checked' : ''}>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">${item.Nama_Siswa}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-500">${item.NIS || '-'}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                ${actionsHTML}
+                            </td>
+                        </tr>
                     `;
-                    dataContainer.appendChild(row);
+                });
+                
+                dataTable.innerHTML = tableHTML;
+                
+                // Add event listeners to checkboxes
+                document.querySelectorAll('.student-checkbox').forEach(checkbox => {
+                    checkbox.addEventListener('change', function() {
+                        const index = parseInt(this.dataset.index);
+                        if (this.checked) {
+                            selectedStudents.add(index);
+                        } else {
+                            selectedStudents.delete(index);
+                        }
+                        updateBulkSendButton();
+                        updateSelectAllCheckboxes();
+                    });
+                });
+                
+                // Add event listeners to action buttons
+                document.querySelectorAll('.student-btn, .parent-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        sendMessage(this);
+                    });
                 });
             }
 
-            // Event listener untuk semua tombol kirim (menggunakan event delegation)
-            dataTable.addEventListener('click', function(event) {
-                // Hanya jalankan jika yang diklik adalah tombol dengan class 'send-btn'
-                if (event.target.closest('.send-btn')) {
-                    const btn = event.target.closest('.send-btn');
-                    sendMessage(btn);
+            // Filter table based on search and filter criteria
+            function filterTable() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const filterType = filterSelect.value;
+                
+                filteredData = fetchedData.filter(item => {
+                    // Filter by search term
+                    const matchesSearch = 
+                        (item.Nama_Siswa && item.Nama_Siswa.toLowerCase().includes(searchTerm)) || 
+                        (item.NIS && item.NIS.toString().includes(searchTerm));
+                    
+                    // Filter by type
+                    let matchesType = true;
+                    if (filterType === 'student') {
+                        matchesType = item.WA_Siswa;
+                    } else if (filterType === 'parent') {
+                        matchesType = item.WA_Ayah || item.WA_Ibu;
+                    }
+                    
+                    return matchesSearch && matchesType;
+                });
+                
+                renderTable();
+            }
+
+            // Show empty state when no data matches
+            function showEmptyState() {
+                dataContainer.classList.add('hidden');
+                statusMessage.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+            }
+
+            // Toggle select all checkboxes
+            function toggleSelectAll() {
+                const isChecked = this.checked;
+                
+                if (isChecked) {
+                    filteredData.forEach((_, index) => {
+                        selectedStudents.add(index);
+                    });
+                } else {
+                    selectedStudents.clear();
                 }
-            });
-            
-            // Fungsi untuk mengirim pesan
+                
+                // Update all checkboxes
+                document.querySelectorAll('.student-checkbox').forEach(checkbox => {
+                    checkbox.checked = isChecked;
+                });
+                
+                updateBulkSendButton();
+            }
+
+            // Update select all checkboxes state
+            function updateSelectAllCheckboxes() {
+                const allChecked = filteredData.length > 0 && 
+                                 filteredData.every((_, index) => selectedStudents.has(index));
+                
+                selectAll.checked = allChecked;
+                selectAllHeader.checked = allChecked;
+            }
+
+            // Update bulk send button state
+            function updateBulkSendButton() {
+                bulkSendBtn.disabled = selectedStudents.size === 0;
+                
+                if (selectedStudents.size > 0) {
+                    bulkSendBtn.classList.add('animate-pulse');
+                    bulkSendBtn.innerHTML = `<i class="fas fa-paper-plane mr-2"></i> Kirim (${selectedStudents.size})`;
+                } else {
+                    bulkSendBtn.classList.remove('animate-pulse');
+                    bulkSendBtn.innerHTML = `<i class="fas fa-paper-plane mr-2"></i> Kirim Massal`;
+                }
+            }
+
+            // Send message to a single recipient
             function sendMessage(btn) {
                 const template = document.getElementById('message-template').value;
                 if (!template) {
-                    showAlert('Harap isi template pesan terlebih dahulu.', 'error');
+                    showToast('Harap isi template pesan terlebih dahulu', 'error');
                     document.getElementById('message-template').focus();
                     return;
                 }
 
-                // Ambil data dari atribut tombol yang diklik
-                const index = btn.dataset.index;
+                const index = parseInt(btn.dataset.index);
                 const phone = btn.dataset.phone;
                 const studentData = filteredData[index];
 
-                // Ganti semua variabel di template dengan data siswa yang sesuai
+                const finalMessage = replaceTemplateVariables(template, studentData);
+                const encodedMessage = encodeURIComponent(finalMessage);
+                const waUrl = `https://wa.me/${phone}?text=${encodedMessage}`;
+                
+                window.open(waUrl, '_blank');
+                showToast('Pesan siap dikirim di WhatsApp', 'success');
+            }
+
+            // Send message from preview modal
+            function sendFromPreviewHandler() {
+                if (currentPreviewIndex === null || currentPreviewPhone === null) return;
+                
+                const studentData = filteredData[currentPreviewIndex];
+                const finalMessage = replaceTemplateVariables(
+                    document.getElementById('message-template').value, 
+                    studentData
+                );
+                
+                const encodedMessage = encodeURIComponent(finalMessage);
+                const waUrl = `https://wa.me/${currentPreviewPhone}?text=${encodedMessage}`;
+                
+                window.open(waUrl, '_blank');
+                previewModal.classList.add('hidden');
+                showToast('Pesan siap dikirim di WhatsApp', 'success');
+            }
+
+            // Send bulk messages to selected recipients
+            function sendBulkMessages() {
+                const template = document.getElementById('message-template').value;
+                if (!template) {
+                    showToast('Harap isi template pesan terlebih dahulu', 'error');
+                    document.getElementById('message-template').focus();
+                    return;
+                }
+
+                // Ask for confirmation
+                if (!confirm(`Anda akan mengirim pesan ke ${selectedStudents.size} penerima. Lanjutkan?`)) {
+                    return;
+                }
+
+                // Open WhatsApp for each selected student
+                selectedStudents.forEach(index => {
+                    const studentData = filteredData[index];
+                    
+                    // Try to send to student first, then parents
+                    if (studentData.WA_Siswa) {
+                        const finalMessage = replaceTemplateVariables(template, studentData);
+                        const encodedMessage = encodeURIComponent(finalMessage);
+                        const waUrl = `https://wa.me/${studentData.WA_Siswa}?text=${encodedMessage}`;
+                        window.open(waUrl, '_blank');
+                    } else if (studentData.WA_Ayah) {
+                        const finalMessage = replaceTemplateVariables(template, studentData);
+                        const encodedMessage = encodeURIComponent(finalMessage);
+                        const waUrl = `https://wa.me/${studentData.WA_Ayah}?text=${encodedMessage}`;
+                        window.open(waUrl, '_blank');
+                    } else if (studentData.WA_Ibu) {
+                        const finalMessage = replaceTemplateVariables(template, studentData);
+                        const encodedMessage = encodeURIComponent(finalMessage);
+                        const waUrl = `https://wa.me/${studentData.WA_Ibu}?text=${encodedMessage}`;
+                        window.open(waUrl, '_blank');
+                    }
+                });
+
+                showToast(`Membuka WhatsApp untuk ${selectedStudents.size} penerima`, 'success');
+            }
+
+            // Replace template variables with actual data
+            function replaceTemplateVariables(template, studentData) {
                 let finalMessage = template;
                 for (const key in studentData) {
                     if (studentData[key] === null || studentData[key] === undefined) {
@@ -556,93 +612,77 @@ Terima kasih."></textarea>
                         finalMessage = finalMessage.replace(new RegExp(`\\[\\[${key}\\]\\]`, 'g'), studentData[key]);
                     }
                 }
-
-                // Encode pesan untuk URL dan buka link wa.me
-                const encodedMessage = encodeURIComponent(finalMessage);
-                const waUrl = `https://wa.me/${phone}?text=${encodedMessage}`;
-                
-                window.open(waUrl, '_blank');
+                return finalMessage;
             }
-            
-            // Fungsi untuk menampilkan alert
-            function showAlert(message, type = 'success') {
-                const alertDiv = document.createElement('div');
-                alertDiv.className = `alert ${type}`;
-                alertDiv.innerHTML = `
-                    <i class="fas ${type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle'}"></i>
-                    ${message}
-                `;
+
+            // Show preview of the message
+            function showPreview() {
+                const template = document.getElementById('message-template').value;
+                if (!template) {
+                    showToast('Harap isi template pesan terlebih dahulu', 'error');
+                    document.getElementById('message-template').focus();
+                    return;
+                }
+
+                // Find the first student with WhatsApp number
+                const previewStudent = filteredData.find(student => 
+                    student.WA_Siswa || student.WA_Ayah || student.WA_Ibu
+                );
+
+                if (!previewStudent) {
+                    showToast('Tidak ada penerima yang valid untuk pratinjau', 'error');
+                    return;
+                }
+
+                currentPreviewIndex = filteredData.indexOf(previewStudent);
+                currentPreviewPhone = previewStudent.WA_Siswa || previewStudent.WA_Ayah || previewStudent.WA_Ibu;
+
+                const finalMessage = replaceTemplateVariables(template, previewStudent);
+                previewContent.textContent = finalMessage;
+                previewModal.classList.remove('hidden');
+            }
+
+            // Save template to localStorage
+            function saveTemplate() {
+                const template = document.getElementById('message-template').value;
+                localStorage.setItem('whatsappTemplate', template);
+                showToast('Template berhasil disimpan', 'success');
+            }
+
+            // Load template from localStorage
+            function loadTemplate() {
+                const savedTemplate = localStorage.getItem('whatsappTemplate');
+                if (savedTemplate) {
+                    document.getElementById('message-template').value = savedTemplate;
+                }
+            }
+
+            // Show toast notification
+            function showToast(message, type = 'success') {
+                const toastIcon = document.getElementById('toast-icon');
+                const toastMessage = document.getElementById('toast-message');
                 
-                document.body.appendChild(alertDiv);
+                // Set icon and color based on type
+                if (type === 'success') {
+                    toastIcon.className = 'fas fa-check-circle mr-3 text-xl text-green-500';
+                    toast.style.borderLeftColor = 'green';
+                } else {
+                    toastIcon.className = 'fas fa-exclamation-circle mr-3 text-xl text-red-500';
+                    toast.style.borderLeftColor = 'red';
+                }
                 
+                toastMessage.textContent = message;
+                toast.classList.remove('hidden');
+                
+                // Hide after 3 seconds
                 setTimeout(() => {
-                    alertDiv.classList.add('fade-out');
-                    setTimeout(() => {
-                        alertDiv.remove();
-                    }, 500);
+                    toast.classList.add('hidden');
                 }, 3000);
             }
 
-            // Mulai proses
-            loadData();
+            // Initialize
+            loadTemplate();
         });
-        
-        // Fungsi untuk filter tabel
-        function filterTable(type = 'all') {
-            const searchInput = document.getElementById('searchInput');
-            const searchTerm = searchInput.value.toLowerCase();
-            const filterButtons = document.querySelectorAll('.filter-btn');
-            
-            // Update active button
-            filterButtons.forEach(btn => {
-                btn.classList.remove('active');
-                if ((type === 'all' && btn.textContent === 'Semua') || 
-                    (type === 'student' && btn.textContent === 'Siswa') || 
-                    (type === 'parent' && btn.textContent === 'Orang Tua')) {
-                    btn.classList.add('active');
-                }
-            });
-            
-            // Filter data
-            filteredData = fetchedData.filter(item => {
-                // Filter berdasarkan search term
-                const matchesSearch = 
-                    (item.Nama_Siswa && item.Nama_Siswa.toLowerCase().includes(searchTerm)) || 
-                    (item.NIS && item.NIS.toString().includes(searchTerm));
-                
-                // Filter berdasarkan type
-                let matchesType = true;
-                if (type === 'student') {
-                    matchesType = item.WA_Siswa;
-                } else if (type === 'parent') {
-                    matchesType = item.WA_Ayah || item.WA_Ibu;
-                }
-                
-                return matchesSearch && matchesType;
-            });
-            
-            // Render tabel dengan data yang sudah difilter
-            renderTable(filteredData);
-        }
-        
-        // Fungsi untuk scroll ke atas
-        function scrollToTop() {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        }
-        
-        // Tampilkan/menyembunyikan tombol scroll to top
-        window.onscroll = function() {
-            const fab = document.querySelector('.fab');
-            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
-                fab.style.display = 'flex';
-            } else {
-                fab.style.display = 'none';
-            }
-        };
     </script>
-
 </body>
 </html>
