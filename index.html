@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Database Siswa</title>
+    <title>Kirim Pesan WhatsApp</title>
     <style>
-        /* Gaya dasar untuk halaman */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             line-height: 1.6;
@@ -14,26 +13,49 @@
             margin: 0;
             padding: 20px;
         }
-        /* Kontainer utama */
         .container {
-            max-width: 900px;
+            max-width: 1000px;
             margin: 0 auto;
             background-color: #fff;
             padding: 25px;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-        h1 {
+        h1, h2 {
             text-align: center;
             color: #2c3e50;
         }
-        /* Gaya untuk tabel */
+        /* Kotak Template Pesan */
+        .template-box {
+            background-color: #ecf0f1;
+            border: 1px solid #bdc3c7;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .template-box h2 {
+            text-align: left;
+            margin-top: 0;
+            font-size: 1.5em;
+        }
+        #message-template {
+            width: 100%;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #bdc3c7;
+            font-size: 1em;
+            box-sizing: border-box; /* Penting agar padding tidak menambah lebar */
+        }
+        .variables {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
         }
-        /* Sembunyikan tabel saat data belum dimuat */
         table.hidden {
             display: none;
         }
@@ -41,17 +63,15 @@
             padding: 12px 15px;
             border: 1px solid #ddd;
             text-align: left;
+            vertical-align: middle;
         }
         thead tr {
             background-color: #3498db;
             color: #fff;
-            font-weight: bold;
         }
-        /* Warna baris bergantian agar mudah dibaca */
         tbody tr:nth-child(even) {
             background-color: #f2f2f2;
         }
-        /* Pesan status (loading & error) */
         #status-message {
             text-align: center;
             padding: 20px;
@@ -62,28 +82,41 @@
             color: #e74c3c;
             font-weight: bold;
         }
-        /* Tombol WhatsApp */
-        .wa-link {
+        /* Tombol Kirim Pesan */
+        .send-btn {
             display: inline-block;
-            margin-right: 5px;
-            padding: 4px 8px;
-            background-color: #25D366;
+            margin: 2px;
+            padding: 6px 12px;
             color: white;
             text-decoration: none;
             border-radius: 4px;
             font-size: 0.9em;
+            border: none;
+            cursor: pointer;
         }
-        .wa-link:hover {
-            background-color: #128C7E;
-        }
+        .send-btn.student { background-color: #25D366; }
+        .send-btn.student:hover { background-color: #128C7E; }
+        .send-btn.parent { background-color: #3498db; }
+        .send-btn.parent:hover { background-color: #2980b9; }
+
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>Daftar Siswa dari Google Sheet</h1>
+        <h1>Kirim Notifikasi WhatsApp</h1>
 
-        <div id="status-message">Memuat data, mohon tunggu...</div>
+        <div class="template-box">
+            <h2>1. Buat Template Pesan</h2>
+            <p>Gunakan variabel dinamis. Variabel akan otomatis diganti sesuai data di setiap baris.</p>
+            <textarea id="message-template" rows="6" placeholder="Contoh: Assalamualaikum Bapak/Ibu wali dari [[Nama_Siswa]], kami ingin menginformasikan bahwa... Terima kasih."></textarea>
+            <div class="variables">
+                <strong>Variabel Tersedia:</strong> [[No]], [[NIS]], [[Nama_Siswa]], [[WA_Siswa]], [[WA_Ayah]], [[WA_Ibu]], [[id_file_google]]
+            </div>
+        </div>
+
+        <h2 style="text-align:left; margin-top:30px;">2. Pilih Penerima dan Kirim</h2>
+        <div id="status-message">Memuat data siswa, mohon tunggu...</div>
 
         <table id="dataTable" class="hidden">
             <thead>
@@ -91,7 +124,7 @@
                     <th>No.</th>
                     <th>NIS</th>
                     <th>Nama Siswa</th>
-                    <th>Kontak WhatsApp</th>
+                    <th>Kirim Pesan</th>
                 </tr>
             </thead>
             <tbody id="data-container">
@@ -101,79 +134,98 @@
 
     <script>
         // ===================================================================
-        // GANTI URL DI BAWAH INI DENGAN URL WEB APP ANDA
-        // ===================================================================
         const webAppUrl = 'https://script.google.com/macros/s/AKfycbz3nCIRHCMaUQy6LJcF6eZoD8TiQmJIVFsAygGRgHyxGwnDrKsOb5z_6Y96N0XHgyCNxw/exec';
         // ===================================================================
 
-        // Menunggu sampai seluruh halaman HTML dimuat sebelum menjalankan script
+        // Deklarasikan variabel data di luar fungsi agar bisa diakses oleh event listener
+        let fetchedData = [];
+
         document.addEventListener('DOMContentLoaded', () => {
             const dataContainer = document.getElementById('data-container');
             const statusMessage = document.getElementById('status-message');
             const dataTable = document.getElementById('dataTable');
 
-            // Fungsi untuk mengambil dan menampilkan data
-            async function fetchData() {
+            async function loadData() {
                 try {
-                    // 1. Ambil data dari URL Web App
                     const response = await fetch(webAppUrl);
-
-                    // Jika respons tidak OK (misal: error 404, 500), lemparkan error
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! Status: ${response.status}`);
-                    }
-
-                    const data = await response.json();
+                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
                     
-                    // Jika tidak ada data, tampilkan pesan
-                    if (data.length === 0) {
+                    fetchedData = await response.json();
+                    
+                    if (fetchedData.length === 0) {
                         statusMessage.textContent = 'Tidak ada data untuk ditampilkan.';
                         return;
                     }
 
-                    // 2. Kosongkan kontainer dan tampilkan tabel
-                    dataContainer.innerHTML = '';
-                    dataTable.classList.remove('hidden'); // Tampilkan tabel
-                    statusMessage.style.display = 'none'; // Sembunyikan pesan status
-
-                    // 3. Loop setiap item data dan buat baris tabel
-                    data.forEach(item => {
-                        const row = document.createElement('tr');
-
-                        // Membuat link WhatsApp yang dinamis
-                        let kontakHtml = '';
-                        if (item.WA_Siswa) {
-                            kontakHtml += `<a class="wa-link" href="https://wa.me/${item.WA_Siswa}" target="_blank">Siswa</a>`;
-                        }
-                        if (item.WA_Ayah) {
-                            kontakHtml += `<a class="wa-link" href="https://wa.me/${item.WA_Ayah}" target="_blank">Ayah</a>`;
-                        }
-                        if (item.WA_Ibu) {
-                            kontakHtml += `<a class="wa-link" href="https://wa.me/${item.WA_Ibu}" target="_blank">Ibu</a>`;
-                        }
-
-                        // Isi sel-sel tabel dengan data
-                        row.innerHTML = `
-                            <td>${item.No}</td>
-                            <td>${item.NIS}</td>
-                            <td>${item.Nama_Siswa}</td>
-                            <td>${kontakHtml || '-'}</td>
-                        `;
-
-                        // Tambahkan baris ke dalam tabel
-                        dataContainer.appendChild(row);
-                    });
+                    dataTable.classList.remove('hidden');
+                    statusMessage.style.display = 'none';
+                    renderTable(fetchedData);
 
                 } catch (error) {
                     console.error('Gagal mengambil data:', error);
-                    // Tampilkan pesan error yang ramah untuk pengguna
-                    statusMessage.textContent = 'Gagal memuat data. Silakan coba lagi nanti.';
+                    statusMessage.textContent = 'Gagal memuat data. Periksa URL atau koneksi internet.';
                     statusMessage.classList.add('error');
                 }
             }
 
-            // Panggil fungsi untuk memulai proses
-            fetchData();
+            function renderTable(data) {
+                dataContainer.innerHTML = '';
+                data.forEach((item, index) => {
+                    const row = document.createElement('tr');
+                    
+                    // Membuat tombol kirim secara dinamis
+                    let actionsHtml = '';
+                    if (item.WA_Siswa) {
+                        actionsHtml += `<button class="send-btn student" data-index="${index}" data-phone="${item.WA_Siswa}">Siswa</button>`;
+                    }
+                    if (item.WA_Ayah) {
+                        actionsHtml += `<button class="send-btn parent" data-index="${index}" data-phone="${item.WA_Ayah}">Ayah</button>`;
+                    }
+                    if (item.WA_Ibu) {
+                        actionsHtml += `<button class="send-btn parent" data-index="${index}" data-phone="${item.WA_Ibu}">Ibu</button>`;
+                    }
+
+                    row.innerHTML = `
+                        <td>${item.No}</td>
+                        <td>${item.NIS}</td>
+                        <td>${item.Nama_Siswa}</td>
+                        <td>${actionsHtml || '-'}</td>
+                    `;
+                    dataContainer.appendChild(row);
+                });
+            }
+
+            // Event listener untuk semua tombol kirim (menggunakan event delegation)
+            dataTable.addEventListener('click', function(event) {
+                // Hanya jalankan jika yang diklik adalah tombol dengan class 'send-btn'
+                if (event.target.classList.contains('send-btn')) {
+                    const template = document.getElementById('message-template').value;
+                    if (!template) {
+                        alert('Harap isi template pesan terlebih dahulu.');
+                        return;
+                    }
+
+                    // Ambil data dari atribut tombol yang diklik
+                    const index = event.target.dataset.index;
+                    const phone = event.target.dataset.phone;
+                    const studentData = fetchedData[index];
+
+                    // Ganti semua variabel di template dengan data siswa yang sesuai
+                    let finalMessage = template;
+                    for (const key in studentData) {
+                        finalMessage = finalMessage.replace(new RegExp(`\\[\\[${key}\\]\\]`, 'g'), studentData[key]);
+                    }
+
+                    // Encode pesan untuk URL dan buka link wa.me
+                    const encodedMessage = encodeURIComponent(finalMessage);
+                    const waUrl = `https://wa.me/${phone}?text=${encodedMessage}`;
+                    
+                    window.open(waUrl, '_blank');
+                }
+            });
+
+            // Mulai proses
+            loadData();
         });
     </script>
 
