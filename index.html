@@ -3,61 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>WhatsApp Blaster v3.3</title>
+    <title>WA Sender Pro v4.0</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        // Mengintegrasikan Font Inter ke Tailwind
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                },
+            },
+        };
+    </script>
     <style>
         * { -webkit-tap-highlight-color: transparent; }
+        /* Menggunakan breakpoint 'md' (768px) untuk transisi ke tampilan kartu */
         @media (max-width: 767px) {
             #desktop-table thead { display: none; }
-            #desktop-table tr {
-                display: block;
-                margin-bottom: 1rem;
-                border-radius: 0.75rem;
-                border: 1px solid #e5e7eb;
-                box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-                background: white;
-            }
-            #desktop-table td {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 0.8rem 1rem;
-                border-bottom: 1px solid #f3f4f6;
-                position: relative; /* Diperlukan untuk ::before */
-            }
-            #desktop-table td:last-child { border-bottom: none; background-color: #f9fafb; padding-top: 1rem; padding-bottom: 1rem; }
-            
-            #desktop-table td::before {
-                content: attr(data-label);
-                font-weight: 600;
-                color: #4b5563;
-                font-size: 0.875rem;
-                position: absolute;
-                left: 1rem;
-
-                /* ### PERBAIKAN DI SINI ### */
-                /* Membuat "lapisan" label ini tidak bisa di-klik */
-                pointer-events: none;
-            }
-            
-            #desktop-table td > * {
-                /* Memastikan konten asli (tombol, checkbox) bisa di-klik */
-                position: relative;
-                z-index: 1;
-            }
-
-            #desktop-table td:first-child > * {
-                /* Khusus untuk checkbox agar tidak tertimpa */
-                margin-left: auto;
-            }
-
-            #desktop-table .action-buttons { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: flex-end; flex-grow: 1; }
-            #desktop-table .action-buttons button { flex-grow: 1; }
+            #desktop-table tr { display: block; }
+            #desktop-table td { display: block; }
         }
     </style>
 </head>
-<body class="bg-gray-100 font-sans pb-24 sm:pb-4">
+<body class="bg-gray-50 font-sans pb-24 sm:pb-4">
 
     <div id="toast" class="fixed top-5 right-5 z-50 hidden max-w-sm">
         <div class="flex items-center p-4 rounded-lg shadow-lg bg-white border-l-4">
@@ -68,19 +42,19 @@
 
     <div class="container mx-auto max-w-7xl px-2 sm:px-4 py-4">
         <div class="sm:hidden flex bg-white rounded-lg shadow-sm p-1 mb-4">
-            <button id="template-tab-btn" class="flex-1 py-2 px-3 text-sm font-semibold rounded-md bg-blue-600 text-white transition-all duration-300"><i class="fas fa-edit mr-2"></i>Template</button>
-            <button id="recipient-tab-btn" class="flex-1 py-2 px-3 text-sm font-semibold rounded-md text-gray-600 transition-all duration-300"><i class="fas fa-users mr-2"></i>Penerima</button>
+            <button id="template-tab-btn" class="flex-1 py-2 px-3 text-sm font-semibold rounded-md bg-indigo-600 text-white shadow transition-all duration-300"><i class="fas fa-edit mr-2"></i>Template</button>
+            <button id="recipient-tab-btn" class="flex-1 py-2 px-3 text-sm font-semibold rounded-md text-gray-500 transition-all duration-300"><i class="fas fa-users mr-2"></i>Penerima</button>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div id="template-section" class="lg:col-span-1">
                 <div class="bg-white rounded-xl shadow-md p-5 sticky top-4">
                     <h2 class="text-xl font-bold text-gray-800 mb-4">Template Pesan</h2>
-                    <textarea id="message-template" rows="10" class="w-full text-sm p-3 border rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="Ketik pesan Anda di sini..."></textarea>
+                    <textarea id="message-template" rows="10" class="w-full text-sm p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500" placeholder="Ketik pesan Anda di sini..."></textarea>
                     <div class="text-xs text-gray-500 mt-2 mb-4">Variabel: [[Nama_Siswa]], [[Nama_Panggilan]], [[NIS]], [[Kelas]], [[Link]]</div>
                     <div class="flex justify-end gap-3">
-                        <button id="preview-btn" class="px-4 py-2 bg-gray-200 text-gray-800 text-sm font-semibold rounded-lg hover:bg-gray-300"><i class="fas fa-eye mr-2"></i>Preview</button>
-                        <button id="save-template-btn" class="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700"><i class="fas fa-save mr-2"></i>Simpan</button>
+                        <button id="preview-btn" class="px-4 py-2 bg-gray-200 text-gray-800 text-sm font-semibold rounded-lg hover:bg-gray-300 transition-colors"><i class="fas fa-eye mr-2"></i>Preview</button>
+                        <button id="save-template-btn" class="px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 transition-colors"><i class="fas fa-save mr-2"></i>Simpan</button>
                     </div>
                 </div>
             </div>
@@ -90,31 +64,31 @@
                     <div class="p-5 border-b">
                         <h2 class="text-xl font-bold text-gray-800 mb-4">Daftar Penerima</h2>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <input type="text" id="searchInput" class="w-full text-sm border rounded-lg p-3 focus:ring-2 focus:ring-blue-500" placeholder="Cari nama atau NIS...">
-                            <select id="filterKelas" class="w-full text-sm border rounded-lg p-3 focus:ring-2 focus:ring-blue-500 bg-white">
+                            <input type="text" id="searchInput" class="w-full text-sm border rounded-lg p-3 focus:ring-2 focus:ring-indigo-500" placeholder="Cari nama atau NIS...">
+                            <select id="filterKelas" class="w-full text-sm border rounded-lg p-3 focus:ring-2 focus:ring-indigo-500 bg-white">
                                 <option value="all">Semua Kelas</option>
                             </select>
                         </div>
                     </div>
                     <div class="p-5 hidden sm:flex justify-between items-center border-b">
                         <div class="flex items-center">
-                            <input type="checkbox" id="selectAllHeader" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-0 mr-2">
+                            <input type="checkbox" id="selectAllHeader" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-0 mr-2">
                             <label for="selectAllHeader" class="text-sm">Pilih Semua yang Tampil</label>
                         </div>
-                        <button id="bulk-send-btn" class="px-4 py-2 bg-green-500 text-white text-sm font-semibold rounded-lg hover:bg-green-600 disabled:opacity-50" disabled><i class="fas fa-paper-plane mr-2"></i>Kirim Massal</button>
+                        <button id="bulk-send-btn" class="px-4 py-2 bg-green-500 text-white text-sm font-semibold rounded-lg hover:bg-green-600 disabled:opacity-50 transition-colors" disabled><i class="fas fa-paper-plane mr-2"></i>Kirim Massal</button>
                     </div>
                     
-                    <div id="status-message" class="text-center p-10"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div><p class="mt-4 text-sm text-gray-500">Memuat data...</p></div>
+                    <div id="status-message" class="text-center p-10"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div><p class="mt-4 text-sm text-gray-500">Memuat data...</p></div>
                     <div id="data-container" class="hidden">
-                        <table id="desktop-table" class="min-w-full">
+                        <table id="desktop-table" class="w-full">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="p-4"></th>
+                                    <th class="p-4 w-12"></th>
                                     <th class="p-4 text-left text-xs font-medium text-gray-500 uppercase">Siswa</th>
                                     <th class="p-4 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody id="dataTableBody" class="bg-white divide-y divide-gray-200"></tbody>
+                            <tbody id="dataTableBody" class="divide-y divide-gray-100 md:divide-none"></tbody>
                         </table>
                     </div>
                     <div id="emptyState" class="hidden text-center p-10"><i class="fas fa-search text-4xl text-gray-300"></i><p class="mt-4 text-sm text-gray-500">Data tidak ditemukan.</p></div>
@@ -125,17 +99,17 @@
 
     <div id="mobile-action-bar" class="sm:hidden fixed bottom-0 left-0 right-0 bg-white p-3 shadow-[0_-2px_10px_rgba(0,0,0,0.1)] flex justify-between items-center">
         <div class="flex items-center">
-            <input type="checkbox" id="selectAllFooter" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-0 mr-2">
+            <input type="checkbox" id="selectAllFooter" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-0 mr-2">
             <label for="selectAllFooter" class="text-sm">Pilih Semua</label>
         </div>
-        <button id="mobile-bulk-send-btn" class="px-4 py-2 bg-green-500 text-white text-sm font-semibold rounded-lg hover:bg-green-600 disabled:opacity-50" disabled><i class="fas fa-paper-plane mr-2"></i>Kirim</button>
+        <button id="mobile-bulk-send-btn" class="px-4 py-2 bg-green-500 text-white text-sm font-semibold rounded-lg hover:bg-green-600 disabled:opacity-50 transition-colors" disabled><i class="fas fa-paper-plane mr-2"></i>Kirim</button>
     </div>
 
     <div id="preview-modal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center p-4">
-         <div class="bg-white rounded-lg shadow-xl max-w-lg w-full">
+        <div class="bg-white rounded-lg shadow-xl max-w-lg w-full">
             <div class="p-5 border-b flex justify-between items-center">
                 <h3 class="text-lg font-bold">Pratinjau Pesan</h3>
-                <button id="close-preview-btn" class="text-gray-400 hover:text-gray-800">&times;</button>
+                <button id="close-preview-btn" class="text-gray-400 hover:text-gray-800 text-2xl">&times;</button>
             </div>
             <div class="p-5 max-h-96 overflow-y-auto"><pre id="preview-content" class="whitespace-pre-wrap font-sans text-sm"></pre></div>
             <div class="p-4 bg-gray-50 flex justify-end"><button id="close-preview-btn-2" class="px-4 py-2 bg-gray-200 text-sm font-semibold rounded-lg">Tutup</button></div>
@@ -164,6 +138,8 @@
             messageTemplate: document.getElementById('message-template'),
             previewModal: document.getElementById('preview-modal'),
             previewContent: document.getElementById('preview-content'),
+            closePreviewBtn: document.getElementById('close-preview-btn'),
+            closePreviewBtn2: document.getElementById('close-preview-btn-2'),
         };
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -183,8 +159,8 @@
             dom.mobileBulkSendBtn.addEventListener('click', sendBulkMessages);
             document.getElementById('save-template-btn').addEventListener('click', saveTemplate);
             document.getElementById('preview-btn').addEventListener('click', showPreview);
-            document.getElementById('close-preview-btn').addEventListener('click', () => dom.previewModal.classList.add('hidden'));
-            document.getElementById('close-preview-btn-2').addEventListener('click', () => dom.previewModal.classList.add('hidden'));
+            dom.closePreviewBtn.addEventListener('click', () => dom.previewModal.classList.add('hidden'));
+            dom.closePreviewBtn2.addEventListener('click', () => dom.previewModal.classList.add('hidden'));
             
             dom.dataTableBody.addEventListener('click', e => {
                 const sendButton = e.target.closest('.send-btn');
@@ -204,10 +180,12 @@
             const isTemplate = tabName === 'template';
             dom.templateSection.classList.toggle('hidden', !isTemplate);
             dom.recipientSection.classList.toggle('hidden', isTemplate);
-            dom.templateTabBtn.classList.toggle('bg-blue-600', isTemplate);
+            dom.templateTabBtn.classList.toggle('bg-indigo-600', isTemplate);
             dom.templateTabBtn.classList.toggle('text-white', isTemplate);
-            dom.recipientTabBtn.classList.toggle('bg-blue-600', !isTemplate);
+            dom.templateTabBtn.classList.toggle('text-gray-500', !isTemplate);
+            dom.recipientTabBtn.classList.toggle('bg-indigo-600', !isTemplate);
             dom.recipientTabBtn.classList.toggle('text-white', !isTemplate);
+            dom.recipientTabBtn.classList.toggle('text-gray-500', isTemplate);
         }
 
         async function loadData() {
@@ -227,11 +205,11 @@
         function populateClassFilter() {
             const kelasList = [...new Set(fetchedData.map(item => item.Kelas).filter(Boolean))];
             kelasList.sort();
-            dom.filterKelas.innerHTML = '<option value="all">Semua Kelas</option>'; // Reset
+            dom.filterKelas.innerHTML = '<option value="all">Semua Kelas</option>';
             kelasList.forEach(kelas => {
                 const option = document.createElement('option');
                 option.value = kelas;
-                option.textContent = kelas;
+                option.textContent = `Kelas ${kelas}`;
                 dom.filterKelas.appendChild(option);
             });
         }
@@ -253,18 +231,39 @@
             dom.dataTableBody.innerHTML = filteredData.map(item => {
                 const originalIndex = fetchedData.indexOf(item);
                 const isSelected = selectedIndices.has(originalIndex);
-                let actionsHTML = '<div class="action-buttons">';
-                if(item.WA_Siswa) actionsHTML += `<button class="send-btn flex-1 px-3 py-2 text-xs font-semibold bg-green-100 text-green-700 rounded-md" data-phone="${item.WA_Siswa}"><i class="fab fa-whatsapp mr-1"></i>Siswa</button>`;
-                if(item.WA_Ayah) actionsHTML += `<button class="send-btn flex-1 px-3 py-2 text-xs font-semibold bg-blue-100 text-blue-700 rounded-md" data-phone="${item.WA_Ayah}"><i class="fab fa-whatsapp mr-1"></i>Ayah</button>`;
-                if(item.WA_Ibu) actionsHTML += `<button class="send-btn flex-1 px-3 py-2 text-xs font-semibold bg-purple-100 text-purple-700 rounded-md" data-phone="${item.WA_Ibu}"><i class="fab fa-whatsapp mr-1"></i>Ibu</button>`;
+                
+                let actionsHTML = '<div class="flex flex-wrap gap-2">';
+                if(item.WA_Siswa) actionsHTML += `<button class="send-btn flex-1 px-3 py-2 text-xs font-semibold bg-green-100 text-green-800 rounded-md hover:bg-green-200 transition-colors" data-phone="${item.WA_Siswa}"><i class="fab fa-whatsapp mr-1.5"></i>Siswa</button>`;
+                if(item.WA_Ayah) actionsHTML += `<button class="send-btn flex-1 px-3 py-2 text-xs font-semibold bg-blue-100 text-blue-800 rounded-md hover:bg-blue-200 transition-colors" data-phone="${item.WA_Ayah}"><i class="fab fa-whatsapp mr-1.5"></i>Ayah</button>`;
+                if(item.WA_Ibu) actionsHTML += `<button class="send-btn flex-1 px-3 py-2 text-xs font-semibold bg-purple-100 text-purple-800 rounded-md hover:bg-purple-200 transition-colors" data-phone="${item.WA_Ibu}"><i class="fab fa-whatsapp mr-1.5"></i>Ibu</button>`;
                 actionsHTML += '</div>';
 
                 return `
-                    <tr class="${isSelected ? 'bg-blue-50' : ''}">
-                        <td data-label="Pilih"><input type="checkbox" class="student-checkbox h-4 w-4" data-index="${originalIndex}" ${isSelected ? 'checked' : ''}></td>
-                        <td data-label="Siswa"><div class="font-bold text-gray-800">${item.Nama_Siswa}</div><div class="text-xs text-gray-500">NIS: ${item.NIS} | Kelas: ${item.Kelas || '-'}</div></td>
-                        <td data-label="Aksi">${actionsHTML}</td>
-                    </tr>`;
+                    <tr class="md:table-row bg-white md:bg-transparent mb-4 md:mb-0 rounded-xl md:rounded-none shadow-sm md:shadow-none transition-colors ${isSelected ? '!bg-indigo-50' : ''}">
+                        <td class="p-4 md:w-12">
+                           <div class="w-full flex justify-end md:justify-start">
+                             <input type="checkbox" class="student-checkbox h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" data-index="${originalIndex}" ${isSelected ? 'checked' : ''}>
+                           </div>
+                        </td>
+                        <td class="p-4">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center mr-4 flex-shrink-0">
+                                    <span class="font-bold text-gray-500">${item.Nama_Siswa ? item.Nama_Siswa.charAt(0) : '?'}</span>
+                                </div>
+                                <div class="flex-grow">
+                                    <div class="font-bold text-gray-800 text-sm">${item.Nama_Siswa}</div>
+                                    <div class="flex items-center gap-2 mt-1 flex-wrap">
+                                        <span class="inline-block px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded-full">NIS: ${item.NIS || '-'}</span>
+                                        <span class="inline-block px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded-full">Kelas: ${item.Kelas || '-'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="p-4">
+                           ${actionsHTML}
+                        </td>
+                    </tr>
+                `;
             }).join('');
         }
         
@@ -272,6 +271,7 @@
             const allVisibleSelected = filteredData.length > 0 && filteredData.every(item => selectedIndices.has(fetchedData.indexOf(item)));
             dom.selectAllHeader.checked = allVisibleSelected;
             dom.selectAllFooter.checked = allVisibleSelected;
+            
             const canSend = selectedIndices.size > 0;
             [dom.bulkSendBtn, dom.mobileBulkSendBtn].forEach(btn => {
                 btn.disabled = !canSend;
@@ -342,7 +342,7 @@
             const toastIcon = toast.querySelector('i');
             const toastMessage = toast.querySelector('span');
             toast.style.borderLeftColor = type === 'success' ? '#22c55e' : '#ef4444';
-            if (toastIcon) toastIcon.className = type === 'success' ? 'fas fa-check-circle text-green-500' : 'fas fa-exclamation-circle text-red-500';
+            if (toastIcon) toastIcon.className = `mr-3 text-xl ${type === 'success' ? 'fas fa-check-circle text-green-500' : 'fas fa-exclamation-circle text-red-500'}`;
             if (toastMessage) toastMessage.textContent = message;
             toast.classList.remove('hidden');
             setTimeout(() => toast.classList.add('hidden'), 3000);
