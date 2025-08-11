@@ -1,1 +1,181 @@
-tes
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Siswa</title>
+    <style>
+        /* Gaya dasar untuk halaman */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        /* Kontainer utama */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        /* Gaya untuk tabel */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        /* Sembunyikan tabel saat data belum dimuat */
+        table.hidden {
+            display: none;
+        }
+        th, td {
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        thead tr {
+            background-color: #3498db;
+            color: #fff;
+            font-weight: bold;
+        }
+        /* Warna baris bergantian agar mudah dibaca */
+        tbody tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        /* Pesan status (loading & error) */
+        #status-message {
+            text-align: center;
+            padding: 20px;
+            font-size: 1.1em;
+            color: #777;
+        }
+        .error {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        /* Tombol WhatsApp */
+        .wa-link {
+            display: inline-block;
+            margin-right: 5px;
+            padding: 4px 8px;
+            background-color: #25D366;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        .wa-link:hover {
+            background-color: #128C7E;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Daftar Siswa dari Google Sheet</h1>
+
+        <div id="status-message">Memuat data, mohon tunggu...</div>
+
+        <table id="dataTable" class="hidden">
+            <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>NIS</th>
+                    <th>Nama Siswa</th>
+                    <th>Kontak WhatsApp</th>
+                </tr>
+            </thead>
+            <tbody id="data-container">
+                </tbody>
+        </table>
+    </div>
+
+    <script>
+        // ===================================================================
+        // GANTI URL DI BAWAH INI DENGAN URL WEB APP ANDA
+        // ===================================================================
+        const webAppUrl = 'https://script.google.com/macros/s/AKfycbz3nCIRHCMaUQy6LJcF6eZoD8TiQmJIVFsAygGRgHyxGwnDrKsOb5z_6Y96N0XHgyCNxw/exec';
+        // ===================================================================
+
+        // Menunggu sampai seluruh halaman HTML dimuat sebelum menjalankan script
+        document.addEventListener('DOMContentLoaded', () => {
+            const dataContainer = document.getElementById('data-container');
+            const statusMessage = document.getElementById('status-message');
+            const dataTable = document.getElementById('dataTable');
+
+            // Fungsi untuk mengambil dan menampilkan data
+            async function fetchData() {
+                try {
+                    // 1. Ambil data dari URL Web App
+                    const response = await fetch(webAppUrl);
+
+                    // Jika respons tidak OK (misal: error 404, 500), lemparkan error
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    
+                    // Jika tidak ada data, tampilkan pesan
+                    if (data.length === 0) {
+                        statusMessage.textContent = 'Tidak ada data untuk ditampilkan.';
+                        return;
+                    }
+
+                    // 2. Kosongkan kontainer dan tampilkan tabel
+                    dataContainer.innerHTML = '';
+                    dataTable.classList.remove('hidden'); // Tampilkan tabel
+                    statusMessage.style.display = 'none'; // Sembunyikan pesan status
+
+                    // 3. Loop setiap item data dan buat baris tabel
+                    data.forEach(item => {
+                        const row = document.createElement('tr');
+
+                        // Membuat link WhatsApp yang dinamis
+                        let kontakHtml = '';
+                        if (item.WA_Siswa) {
+                            kontakHtml += `<a class="wa-link" href="https://wa.me/${item.WA_Siswa}" target="_blank">Siswa</a>`;
+                        }
+                        if (item.WA_Ayah) {
+                            kontakHtml += `<a class="wa-link" href="https://wa.me/${item.WA_Ayah}" target="_blank">Ayah</a>`;
+                        }
+                        if (item.WA_Ibu) {
+                            kontakHtml += `<a class="wa-link" href="https://wa.me/${item.WA_Ibu}" target="_blank">Ibu</a>`;
+                        }
+
+                        // Isi sel-sel tabel dengan data
+                        row.innerHTML = `
+                            <td>${item.No}</td>
+                            <td>${item.NIS}</td>
+                            <td>${item.Nama_Siswa}</td>
+                            <td>${kontakHtml || '-'}</td>
+                        `;
+
+                        // Tambahkan baris ke dalam tabel
+                        dataContainer.appendChild(row);
+                    });
+
+                } catch (error) {
+                    console.error('Gagal mengambil data:', error);
+                    // Tampilkan pesan error yang ramah untuk pengguna
+                    statusMessage.textContent = 'Gagal memuat data. Silakan coba lagi nanti.';
+                    statusMessage.classList.add('error');
+                }
+            }
+
+            // Panggil fungsi untuk memulai proses
+            fetchData();
+        });
+    </script>
+
+</body>
+</html>
