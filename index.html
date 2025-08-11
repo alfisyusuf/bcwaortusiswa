@@ -2,46 +2,14 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Kirim Pesan WhatsApp</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Animate.css -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <!-- Custom Styles -->
     <style>
-        /* Custom animations */
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .animate-fade-in-up {
-            animation: fadeInUp 0.5s ease-out forwards;
-        }
-        
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 10px;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-        
         /* Custom checkbox */
         .custom-checkbox {
             -webkit-appearance: none;
@@ -73,187 +41,254 @@
             transform: translate(-50%, -50%);
         }
         
-        /* Pulse animation for buttons */
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
+        /* Mobile-optimized table */
+        @media (max-width: 768px) {
+            .mobile-table-row {
+                display: flex;
+                flex-direction: column;
+                padding: 12px;
+                border-bottom: 1px solid #e2e8f0;
+                background: white;
+                margin-bottom: 8px;
+                border-radius: 8px;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            }
+            
+            .mobile-table-header {
+                display: none;
+            }
+            
+            .mobile-table-cell {
+                display: flex;
+                justify-content: space-between;
+                padding: 6px 0;
+            }
+            
+            .mobile-table-cell:before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: #4a5568;
+                margin-right: 10px;
+            }
+            
+            .mobile-actions {
+                display: flex;
+                gap: 8px;
+                flex-wrap: wrap;
+                margin-top: 8px;
+            }
+            
+            .mobile-action-btn {
+                flex: 1;
+                min-width: 100px;
+                text-align: center;
+            }
         }
         
-        .animate-pulse {
-            animation: pulse 2s infinite;
+        /* Bottom action bar for mobile */
+        .mobile-action-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 12px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+        }
+        
+        /* Tab navigation for mobile */
+        .mobile-tab-container {
+            position: fixed;
+            bottom: 70px;
+            left: 0;
+            right: 0;
+            background: white;
+            z-index: 90;
+            padding: 10px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            display: none;
+        }
+        
+        .mobile-tab-content {
+            max-height: 60vh;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        
+        /* Loading spinner */
+        .loading-spinner {
+            border: 3px solid rgba(0,0,0,0.1);
+            border-radius: 50%;
+            border-top: 3px solid #3b82f6;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-gray-50 min-h-screen pb-20">
     <!-- Notification Toast -->
-    <div id="toast" class="fixed top-5 right-5 z-50 hidden">
-        <div class="flex items-center p-4 rounded-lg shadow-lg bg-white border-l-4">
-            <i id="toast-icon" class="fas fa-check-circle mr-3 text-xl"></i>
-            <span id="toast-message">Pesan berhasil dikirim!</span>
+    <div id="toast" class="fixed top-5 right-5 left-5 sm:left-auto z-50 hidden">
+        <div class="flex items-center p-4 rounded-lg shadow-lg bg-white border-l-4 border-green-500">
+            <i id="toast-icon" class="fas fa-check-circle mr-3 text-xl text-green-500"></i>
+            <span id="toast-message" class="text-sm">Pesan berhasil dikirim!</span>
         </div>
     </div>
 
-    <div class="container mx-auto px-4 py-8 max-w-6xl">
-        <!-- Header -->
-        <header class="mb-10 text-center animate__animated animate__fadeIn">
-            <div class="inline-block p-4 rounded-full bg-blue-50 mb-4">
-                <i class="fas fa-comments text-4xl text-blue-500"></i>
-            </div>
-            <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2">Kirim Notifikasi WhatsApp</h1>
-            <p class="text-gray-600 max-w-2xl mx-auto">Kirim pesan personal ke siswa dan orang tua dengan template yang dapat disesuaikan</p>
-        </header>
+    <div class="container mx-auto px-4 py-4 max-w-6xl">
+        <!-- Mobile Toggle Buttons -->
+        <div class="flex sm:hidden mb-4 bg-white rounded-lg shadow p-1">
+            <button id="template-tab-btn" class="flex-1 py-2 px-4 rounded-md font-medium text-blue-600 bg-blue-50">
+                <i class="fas fa-edit mr-2"></i> Template
+            </button>
+            <button id="recipient-tab-btn" class="flex-1 py-2 px-4 rounded-md font-medium text-gray-600">
+                <i class="fas fa-users mr-2"></i> Penerima
+            </button>
+        </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Template Section -->
-            <div class="lg:col-span-1 bg-white rounded-xl shadow-md overflow-hidden animate__animated animate__fadeInLeft">
-                <div class="p-6">
-                    <div class="flex items-center mb-4">
-                        <div class="bg-blue-100 p-2 rounded-lg mr-3">
-                            <i class="fas fa-edit text-blue-500"></i>
-                        </div>
-                        <h2 class="text-xl font-semibold text-gray-800">Template Pesan</h2>
+        <!-- Mobile Tab Container -->
+        <div id="mobile-tab-container" class="mobile-tab-container">
+            <div id="mobile-tab-content" class="mobile-tab-content"></div>
+        </div>
+
+        <!-- Template Section (Hidden on mobile by default) -->
+        <div id="template-section" class="hidden sm:block bg-white rounded-xl shadow-md overflow-hidden mb-6">
+            <div class="p-4 sm:p-6">
+                <div class="flex items-center mb-4">
+                    <div class="bg-blue-100 p-2 rounded-lg mr-3">
+                        <i class="fas fa-edit text-blue-500"></i>
                     </div>
-                    
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Variabel Tersedia:</label>
-                        <div class="flex flex-wrap gap-2 mb-4">
-                            <span class="bg-gray-100 px-3 py-1 rounded-full text-xs text-gray-700">[[No]]</span>
-                            <span class="bg-gray-100 px-3 py-1 rounded-full text-xs text-gray-700">[[NIS]]</span>
-                            <span class="bg-gray-100 px-3 py-1 rounded-full text-xs text-gray-700">[[Nama_Siswa]]</span>
-                            <span class="bg-gray-100 px-3 py-1 rounded-full text-xs text-gray-700">[[WA_Siswa]]</span>
-                            <span class="bg-gray-100 px-3 py-1 rounded-full text-xs text-gray-700">[[WA_Ayah]]</span>
-                            <span class="bg-gray-100 px-3 py-1 rounded-full text-xs text-gray-700">[[WA_Ibu]]</span>
-                            <span class="bg-gray-100 px-3 py-1 rounded-full text-xs text-gray-700">[[id_file_google]]</span>
-                        </div>
+                    <h2 class="text-xl font-semibold text-gray-800">Template Pesan</h2>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Variabel Tersedia:</label>
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="bg-gray-100 px-3 py-1 rounded-full text-xs text-gray-700">[[No]]</span>
+                        <span class="bg-gray-100 px-3 py-1 rounded-full text-xs text-gray-700">[[NIS]]</span>
+                        <span class="bg-gray-100 px-3 py-1 rounded-full text-xs text-gray-700">[[Nama_Siswa]]</span>
+                        <span class="bg-gray-100 px-3 py-1 rounded-full text-xs text-gray-700">[[WA_Siswa]]</span>
+                        <span class="bg-gray-100 px-3 py-1 rounded-full text-xs text-gray-700">[[WA_Ayah]]</span>
+                        <span class="bg-gray-100 px-3 py-1 rounded-full text-xs text-gray-700">[[WA_Ibu]]</span>
+                        <span class="bg-gray-100 px-3 py-1 rounded-full text-xs text-gray-700">[[id_file_google]]</span>
                     </div>
-                    
-                    <textarea id="message-template" rows="10" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200" placeholder="Contoh: 
+                </div>
+                
+                <textarea id="message-template" rows="8" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200" placeholder="Contoh: 
 Assalamualaikum Bapak/Ibu wali dari [[Nama_Siswa]], 
 
 Kami ingin menginformasikan bahwa... 
 
 Terima kasih."></textarea>
-                    
-                    <div class="mt-4 flex justify-between items-center">
-                        <button id="preview-btn" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition flex items-center">
-                            <i class="fas fa-eye mr-2"></i> Preview
-                        </button>
-                        <button id="save-template-btn" class="px-4 py-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition flex items-center">
-                            <i class="fas fa-save mr-2"></i> Simpan Template
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Data Section -->
-            <div class="lg:col-span-2 animate__animated animate__fadeInRight">
-                <div class="bg-white rounded-xl shadow-md overflow-hidden">
-                    <div class="p-6 border-b border-gray-200">
-                        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
-                            <div class="flex items-center mb-4 md:mb-0">
-                                <div class="bg-green-100 p-2 rounded-lg mr-3">
-                                    <i class="fas fa-users text-green-500"></i>
-                                </div>
-                                <h2 class="text-xl font-semibold text-gray-800">Daftar Penerima</h2>
-                            </div>
-                            
-                            <div class="flex flex-col sm:flex-row gap-3">
-                                <div class="relative flex-grow">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <i class="fas fa-search text-gray-400"></i>
-                                    </div>
-                                    <input type="text" id="searchInput" class="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200" placeholder="Cari siswa...">
-                                </div>
-                                <select id="filterSelect" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
-                                    <option value="all">Semua</option>
-                                    <option value="student">Siswa</option>
-                                    <option value="parent">Orang Tua</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center">
-                                <input type="checkbox" id="selectAll" class="custom-checkbox mr-2">
-                                <label for="selectAll" class="text-sm text-gray-600">Pilih Semua</label>
-                            </div>
-                            <button id="bulk-send-btn" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition flex items-center disabled:opacity-50" disabled>
-                                <i class="fas fa-paper-plane mr-2"></i> Kirim Massal
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div id="status-message" class="p-8 text-center">
-                        <div class="inline-block animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500 mb-4"></div>
-                        <p class="text-gray-600">Memuat data siswa, mohon tunggu...</p>
-                    </div>
-                    
-                    <div id="data-container" class="hidden overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        <input type="checkbox" id="selectAllHeader" class="custom-checkbox">
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Siswa</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NIS</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody id="dataTable" class="bg-white divide-y divide-gray-200">
-                                <!-- Data will be loaded here -->
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <div id="emptyState" class="hidden p-10 text-center">
-                        <i class="fas fa-user-graduate text-5xl text-gray-300 mb-4"></i>
-                        <h3 class="text-lg font-medium text-gray-700 mb-2">Tidak ada data yang cocok</h3>
-                        <p class="text-gray-500">Coba gunakan kata kunci pencarian yang berbeda</p>
-                    </div>
-                    
-                    <div id="pagination" class="hidden px-6 py-4 flex items-center justify-between border-t border-gray-200">
-                        <div class="flex-1 flex justify-between sm:hidden">
-                            <button class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                                Sebelumnya
-                            </button>
-                            <button class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                                Selanjutnya
-                            </button>
-                        </div>
-                        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                            <div>
-                                <p class="text-sm text-gray-700">
-                                    Menampilkan <span class="font-medium">1</span> sampai <span class="font-medium">10</span> dari <span class="font-medium">20</span> hasil
-                                </p>
-                            </div>
-                            <div>
-                                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                                    <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                                        <span class="sr-only">Previous</span>
-                                        <i class="fas fa-chevron-left"></i>
-                                    </a>
-                                    <a href="#" aria-current="page" class="z-10 bg-blue-50 border-blue-500 text-blue-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
-                                        1
-                                    </a>
-                                    <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
-                                        2
-                                    </a>
-                                    <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
-                                        3
-                                    </a>
-                                    <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                                        <span class="sr-only">Next</span>
-                                        <i class="fas fa-chevron-right"></i>
-                                    </a>
-                                </nav>
-                            </div>
-                        </div>
-                    </div>
+                
+                <div class="mt-4 flex justify-between items-center">
+                    <button id="preview-btn" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition flex items-center text-sm">
+                        <i class="fas fa-eye mr-2"></i> Preview
+                    </button>
+                    <button id="save-template-btn" class="px-4 py-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition flex items-center text-sm">
+                        <i class="fas fa-save mr-2"></i> Simpan
+                    </button>
                 </div>
             </div>
         </div>
+
+        <!-- Data Section -->
+        <div id="recipient-section" class="bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="p-4 sm:p-6 border-b border-gray-200">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+                    <div class="flex items-center mb-4 sm:mb-0">
+                        <div class="bg-green-100 p-2 rounded-lg mr-3 hidden sm:block">
+                            <i class="fas fa-users text-green-500"></i>
+                        </div>
+                        <h2 class="text-xl font-semibold text-gray-800">Daftar Penerima</h2>
+                    </div>
+                    
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <div class="relative flex-grow">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-search text-gray-400"></i>
+                            </div>
+                            <input type="text" id="searchInput" class="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 text-sm" placeholder="Cari siswa...">
+                        </div>
+                        <select id="filterSelect" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 text-sm">
+                            <option value="all">Semua</option>
+                            <option value="student">Siswa</option>
+                            <option value="parent">Orang Tua</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="selectAll" class="custom-checkbox mr-2">
+                        <label for="selectAll" class="text-sm text-gray-600">Pilih Semua</label>
+                    </div>
+                    <button id="bulk-send-btn" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition flex items-center disabled:opacity-50 text-sm" disabled>
+                        <i class="fas fa-paper-plane mr-2"></i> <span class="hidden sm:inline">Kirim Massal</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Loading State -->
+            <div id="status-message" class="p-8 text-center">
+                <div class="loading-spinner"></div>
+                <p class="text-gray-600">Memuat data siswa, mohon tunggu...</p>
+            </div>
+            
+            <!-- Desktop Table -->
+            <div id="desktop-table" class="hidden sm:block overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <input type="checkbox" id="selectAllHeader" class="custom-checkbox">
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Siswa</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NIS</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dataTable" class="bg-white divide-y divide-gray-200">
+                        <!-- Data will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Mobile Table -->
+            <div id="mobile-table" class="sm:hidden p-4">
+                <div id="mobile-data-container">
+                    <!-- Mobile data will be loaded here -->
+                </div>
+            </div>
+            
+            <!-- Empty State -->
+            <div id="emptyState" class="hidden p-10 text-center">
+                <i class="fas fa-user-graduate text-5xl text-gray-300 mb-4"></i>
+                <h3 class="text-lg font-medium text-gray-700 mb-2">Tidak ada data yang cocok</h3>
+                <p class="text-gray-500">Coba gunakan kata kunci pencarian yang berbeda</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Action Bar -->
+    <div class="mobile-action-bar sm:hidden">
+        <div class="flex items-center">
+            <input type="checkbox" id="mobile-select-all" class="custom-checkbox mr-2">
+            <label for="mobile-select-all" class="text-sm text-gray-600">Pilih Semua</label>
+        </div>
+        <button id="mobile-bulk-send-btn" class="px-4 py-2 bg-green-500 text-white rounded-lg flex items-center disabled:opacity-50 text-sm" disabled>
+            <i class="fas fa-paper-plane mr-2"></i> Kirim
+        </button>
     </div>
 
     <!-- Preview Modal -->
@@ -304,15 +339,25 @@ Terima kasih."></textarea>
         let currentPreviewPhone = null;
 
         document.addEventListener('DOMContentLoaded', () => {
+            // DOM Elements
+            const templateSection = document.getElementById('template-section');
+            const recipientSection = document.getElementById('recipient-section');
+            const templateTabBtn = document.getElementById('template-tab-btn');
+            const recipientTabBtn = document.getElementById('recipient-tab-btn');
+            const mobileTabContainer = document.getElementById('mobile-tab-container');
+            const mobileTabContent = document.getElementById('mobile-tab-content');
             const dataContainer = document.getElementById('data-container');
+            const mobileDataContainer = document.getElementById('mobile-data-container');
             const statusMessage = document.getElementById('status-message');
-            const dataTable = document.getElementById('dataTable');
+            const desktopTable = document.getElementById('desktop-table');
             const emptyState = document.getElementById('emptyState');
             const searchInput = document.getElementById('searchInput');
             const filterSelect = document.getElementById('filterSelect');
             const selectAll = document.getElementById('selectAll');
             const selectAllHeader = document.getElementById('selectAllHeader');
+            const mobileSelectAll = document.getElementById('mobile-select-all');
             const bulkSendBtn = document.getElementById('bulk-send-btn');
+            const mobileBulkSendBtn = document.getElementById('mobile-bulk-send-btn');
             const previewBtn = document.getElementById('preview-btn');
             const saveTemplateBtn = document.getElementById('save-template-btn');
             const previewModal = document.getElementById('preview-modal');
@@ -324,12 +369,31 @@ Terima kasih."></textarea>
             // Initialize the app
             loadData();
 
-            // Event listeners
+            // Event listeners for mobile tabs
+            templateTabBtn.addEventListener('click', () => {
+                templateTabBtn.classList.add('text-blue-600', 'bg-blue-50');
+                recipientTabBtn.classList.remove('text-blue-600', 'bg-blue-50');
+                templateSection.classList.remove('hidden');
+                recipientSection.classList.add('hidden');
+                mobileTabContainer.style.display = 'none';
+            });
+
+            recipientTabBtn.addEventListener('click', () => {
+                recipientTabBtn.classList.add('text-blue-600', 'bg-blue-50');
+                templateTabBtn.classList.remove('text-blue-600', 'bg-blue-50');
+                templateSection.classList.add('hidden');
+                recipientSection.classList.remove('hidden');
+                mobileTabContainer.style.display = 'none';
+            });
+
+            // Other event listeners
             searchInput.addEventListener('input', () => filterTable());
             filterSelect.addEventListener('change', () => filterTable());
             selectAll.addEventListener('change', toggleSelectAll);
             selectAllHeader.addEventListener('change', toggleSelectAll);
+            mobileSelectAll.addEventListener('change', toggleSelectAll);
             bulkSendBtn.addEventListener('click', sendBulkMessages);
+            mobileBulkSendBtn.addEventListener('click', sendBulkMessages);
             previewBtn.addEventListener('click', showPreview);
             saveTemplateBtn.addEventListener('click', saveTemplate);
             closePreview.addEventListener('click', () => previewModal.classList.add('hidden'));
@@ -349,40 +413,47 @@ Terima kasih."></textarea>
                         return;
                     }
 
-                    renderTable();
+                    renderTables();
                     statusMessage.classList.add('hidden');
-                    dataContainer.classList.remove('hidden');
+                    desktopTable.classList.remove('hidden');
 
                 } catch (error) {
                     console.error('Gagal mengambil data:', error);
                     statusMessage.innerHTML = `
-                        <i class="fas fa-exclamation-triangle text-red-500 text-3xl mb-3"></i>
-                        <p class="text-red-500 font-medium">Gagal memuat data. Periksa URL atau koneksi internet.</p>
+                        <div class="text-red-500 font-medium">
+                            <i class="fas fa-exclamation-triangle mr-2"></i> Gagal memuat data. Periksa URL atau koneksi internet.
+                        </div>
                     `;
                 }
             }
 
-            // Render table with current filtered data
-            function renderTable() {
+            // Render both desktop and mobile tables
+            function renderTables() {
                 if (filteredData.length === 0) {
                     showEmptyState();
                     return;
                 }
                 
                 emptyState.classList.add('hidden');
-                dataContainer.classList.remove('hidden');
+                desktopTable.classList.remove('hidden');
                 
+                renderDesktopTable();
+                renderMobileTable();
+            }
+
+            // Render desktop table
+            function renderDesktopTable() {
                 let tableHTML = '';
                 
                 filteredData.forEach((item, index) => {
                     const isSelected = selectedStudents.has(index);
                     
                     // Prepare action buttons
-                    let actionsHTML = '<div class="flex flex-col sm:flex-row gap-2">';
+                    let actionsHTML = '<div class="flex gap-2">';
                     
                     if (item.WA_Siswa) {
                         actionsHTML += `
-                            <button class="student-btn px-3 py-1 bg-green-100 text-green-700 rounded-md text-sm hover:bg-green-200 transition flex items-center justify-center" 
+                            <button class="student-btn px-3 py-1 bg-green-100 text-green-700 rounded-md text-xs hover:bg-green-200 transition flex items-center" 
                                 data-index="${index}" data-phone="${item.WA_Siswa}">
                                 <i class="fas fa-user-graduate mr-1"></i> Siswa
                             </button>`;
@@ -390,7 +461,7 @@ Terima kasih."></textarea>
                     
                     if (item.WA_Ayah) {
                         actionsHTML += `
-                            <button class="parent-btn px-3 py-1 bg-blue-100 text-blue-700 rounded-md text-sm hover:bg-blue-200 transition flex items-center justify-center" 
+                            <button class="parent-btn px-3 py-1 bg-blue-100 text-blue-700 rounded-md text-xs hover:bg-blue-200 transition flex items-center" 
                                 data-index="${index}" data-phone="${item.WA_Ayah}">
                                 <i class="fas fa-male mr-1"></i> Ayah
                             </button>`;
@@ -398,7 +469,7 @@ Terima kasih."></textarea>
                     
                     if (item.WA_Ibu) {
                         actionsHTML += `
-                            <button class="parent-btn px-3 py-1 bg-purple-100 text-purple-700 rounded-md text-sm hover:bg-purple-200 transition flex items-center justify-center" 
+                            <button class="parent-btn px-3 py-1 bg-purple-100 text-purple-700 rounded-md text-xs hover:bg-purple-200 transition flex items-center" 
                                 data-index="${index}" data-phone="${item.WA_Ibu}">
                                 <i class="fas fa-female mr-1"></i> Ibu
                             </button>`;
@@ -425,10 +496,75 @@ Terima kasih."></textarea>
                     `;
                 });
                 
-                dataTable.innerHTML = tableHTML;
+                document.getElementById('dataTable').innerHTML = tableHTML;
                 
-                // Add event listeners to checkboxes
-                document.querySelectorAll('.student-checkbox').forEach(checkbox => {
+                // Add event listeners to checkboxes and buttons
+                addTableEventListeners();
+            }
+
+            // Render mobile-friendly table
+            function renderMobileTable() {
+                let mobileHTML = '';
+                
+                filteredData.forEach((item, index) => {
+                    const isSelected = selectedStudents.has(index);
+                    
+                    // Prepare action buttons
+                    let actionsHTML = '<div class="mobile-actions">';
+                    
+                    if (item.WA_Siswa) {
+                        actionsHTML += `
+                            <button class="mobile-action-btn student-btn px-3 py-2 bg-green-100 text-green-700 rounded-md text-xs hover:bg-green-200 transition flex items-center justify-center" 
+                                data-index="${index}" data-phone="${item.WA_Siswa}">
+                                <i class="fas fa-user-graduate mr-1"></i> Siswa
+                            </button>`;
+                    }
+                    
+                    if (item.WA_Ayah) {
+                        actionsHTML += `
+                            <button class="mobile-action-btn parent-btn px-3 py-2 bg-blue-100 text-blue-700 rounded-md text-xs hover:bg-blue-200 transition flex items-center justify-center" 
+                                data-index="${index}" data-phone="${item.WA_Ayah}">
+                                <i class="fas fa-male mr-1"></i> Ayah
+                            </button>`;
+                    }
+                    
+                    if (item.WA_Ibu) {
+                        actionsHTML += `
+                            <button class="mobile-action-btn parent-btn px-3 py-2 bg-purple-100 text-purple-700 rounded-md text-xs hover:bg-purple-200 transition flex items-center justify-center" 
+                                data-index="${index}" data-phone="${item.WA_Ibu}">
+                                <i class="fas fa-female mr-1"></i> Ibu
+                            </button>`;
+                    }
+                    
+                    actionsHTML += '</div>';
+                    
+                    mobileHTML += `
+                        <div class="mobile-table-row ${isSelected ? 'bg-blue-50' : ''}">
+                            <div class="mobile-table-cell" data-label="Pilih">
+                                <input type="checkbox" class="custom-checkbox mobile-student-checkbox" 
+                                    data-index="${index}" ${isSelected ? 'checked' : ''}>
+                            </div>
+                            <div class="mobile-table-cell" data-label="Nama">
+                                <div class="text-sm font-medium text-gray-900">${item.Nama_Siswa}</div>
+                            </div>
+                            <div class="mobile-table-cell" data-label="NIS">
+                                <div class="text-sm text-gray-500">${item.NIS || '-'}</div>
+                            </div>
+                            ${actionsHTML}
+                        </div>
+                    `;
+                });
+                
+                mobileDataContainer.innerHTML = mobileHTML;
+                
+                // Add event listeners to checkboxes and buttons
+                addTableEventListeners();
+            }
+
+            // Add event listeners to table elements
+            function addTableEventListeners() {
+                // Checkboxes
+                document.querySelectorAll('.student-checkbox, .mobile-student-checkbox').forEach(checkbox => {
                     checkbox.addEventListener('change', function() {
                         const index = parseInt(this.dataset.index);
                         if (this.checked) {
@@ -436,12 +572,12 @@ Terima kasih."></textarea>
                         } else {
                             selectedStudents.delete(index);
                         }
-                        updateBulkSendButton();
+                        updateBulkSendButtons();
                         updateSelectAllCheckboxes();
                     });
                 });
                 
-                // Add event listeners to action buttons
+                // Action buttons
                 document.querySelectorAll('.student-btn, .parent-btn').forEach(btn => {
                     btn.addEventListener('click', function() {
                         sendMessage(this);
@@ -471,12 +607,13 @@ Terima kasih."></textarea>
                     return matchesSearch && matchesType;
                 });
                 
-                renderTable();
+                renderTables();
             }
 
             // Show empty state when no data matches
             function showEmptyState() {
-                dataContainer.classList.add('hidden');
+                desktopTable.classList.add('hidden');
+                mobileDataContainer.innerHTML = '';
                 statusMessage.classList.add('hidden');
                 emptyState.classList.remove('hidden');
             }
@@ -494,11 +631,11 @@ Terima kasih."></textarea>
                 }
                 
                 // Update all checkboxes
-                document.querySelectorAll('.student-checkbox').forEach(checkbox => {
+                document.querySelectorAll('.student-checkbox, .mobile-student-checkbox').forEach(checkbox => {
                     checkbox.checked = isChecked;
                 });
                 
-                updateBulkSendButton();
+                updateBulkSendButtons();
             }
 
             // Update select all checkboxes state
@@ -508,18 +645,22 @@ Terima kasih."></textarea>
                 
                 selectAll.checked = allChecked;
                 selectAllHeader.checked = allChecked;
+                mobileSelectAll.checked = allChecked;
             }
 
-            // Update bulk send button state
-            function updateBulkSendButton() {
-                bulkSendBtn.disabled = selectedStudents.size === 0;
+            // Update bulk send buttons state
+            function updateBulkSendButtons() {
+                const hasSelected = selectedStudents.size > 0;
                 
-                if (selectedStudents.size > 0) {
-                    bulkSendBtn.classList.add('animate-pulse');
+                bulkSendBtn.disabled = !hasSelected;
+                mobileBulkSendBtn.disabled = !hasSelected;
+                
+                if (hasSelected) {
                     bulkSendBtn.innerHTML = `<i class="fas fa-paper-plane mr-2"></i> Kirim (${selectedStudents.size})`;
+                    mobileBulkSendBtn.innerHTML = `<i class="fas fa-paper-plane mr-2"></i> Kirim (${selectedStudents.size})`;
                 } else {
-                    bulkSendBtn.classList.remove('animate-pulse');
                     bulkSendBtn.innerHTML = `<i class="fas fa-paper-plane mr-2"></i> Kirim Massal`;
+                    mobileBulkSendBtn.innerHTML = `<i class="fas fa-paper-plane mr-2"></i> Kirim`;
                 }
             }
 
@@ -528,7 +669,11 @@ Terima kasih."></textarea>
                 const template = document.getElementById('message-template').value;
                 if (!template) {
                     showToast('Harap isi template pesan terlebih dahulu', 'error');
-                    document.getElementById('message-template').focus();
+                    // On mobile, switch to template tab if empty
+                    if (window.innerWidth < 640) {
+                        templateTabBtn.click();
+                        document.getElementById('message-template').focus();
+                    }
                     return;
                 }
 
@@ -567,7 +712,11 @@ Terima kasih."></textarea>
                 const template = document.getElementById('message-template').value;
                 if (!template) {
                     showToast('Harap isi template pesan terlebih dahulu', 'error');
-                    document.getElementById('message-template').focus();
+                    // On mobile, switch to template tab if empty
+                    if (window.innerWidth < 640) {
+                        templateTabBtn.click();
+                        document.getElementById('message-template').focus();
+                    }
                     return;
                 }
 
@@ -620,7 +769,6 @@ Terima kasih."></textarea>
                 const template = document.getElementById('message-template').value;
                 if (!template) {
                     showToast('Harap isi template pesan terlebih dahulu', 'error');
-                    document.getElementById('message-template').focus();
                     return;
                 }
 
@@ -682,6 +830,39 @@ Terima kasih."></textarea>
 
             // Initialize
             loadTemplate();
+
+            // Set up mobile tab switching
+            setupMobileTabs();
+        });
+
+        // Set up mobile tab navigation
+        function setupMobileTabs() {
+            if (window.innerWidth >= 640) return; // Only for mobile
+            
+            // Hide template section by default on mobile
+            document.getElementById('template-section').classList.add('hidden');
+            document.getElementById('recipient-section').classList.remove('hidden');
+            
+            // Set up template tab content
+            document.getElementById('template-tab-btn').addEventListener('click', function() {
+                const templateContent = document.getElementById('template-section').innerHTML;
+                document.getElementById('mobile-tab-content').innerHTML = templateContent;
+                document.getElementById('mobile-tab-container').style.display = 'block';
+                
+                // Re-attach event listeners for elements inside the tab
+                document.getElementById('preview-btn').addEventListener('click', showPreview);
+                document.getElementById('save-template-btn').addEventListener('click', saveTemplate);
+            });
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth >= 640) {
+                // On desktop, ensure both sections are visible
+                document.getElementById('template-section').classList.remove('hidden');
+                document.getElementById('recipient-section').classList.remove('hidden');
+                document.getElementById('mobile-tab-container').style.display = 'none';
+            }
         });
     </script>
 </body>
